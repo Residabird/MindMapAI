@@ -1,4 +1,5 @@
 at > .gitignore << 'EOF'
+
 ## Visual Studio
 .vs/
 bin/
