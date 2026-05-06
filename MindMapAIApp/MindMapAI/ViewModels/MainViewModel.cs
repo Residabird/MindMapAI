@@ -7,7 +7,7 @@ using MindMapAICore.Services;
 
 namespace MindMapAI.ViewModels
 {
-    public class MainViewModel : ViewModelBase
+    public class MainViewModel : ViewModelBase  // тут не знаю что 
     {
         private readonly IDatabaseService _databaseService;
 
@@ -15,7 +15,7 @@ namespace MindMapAI.ViewModels
         private string _newNoteTitle = string.Empty;
         private string _newNoteContent = string.Empty;
 
-        public Note? SelectedNote
+        public Note? SelectedNote   // тут не знаю что 
         {
             get => _selectedNote;
             set
@@ -25,7 +25,7 @@ namespace MindMapAI.ViewModels
             }
         }
 
-        public string NewNoteTitle
+        public string NewNoteTitle  // тут не знаю что 
         {
             get => _newNoteTitle;
             set => SetField(ref _newNoteTitle, value);
@@ -37,7 +37,7 @@ namespace MindMapAI.ViewModels
             set => SetField(ref _newNoteContent, value);
         }
 
-        public MainViewModel(IDatabaseService databaseService)
+        public MainViewModel(IDatabaseService databaseService)  //  тут не знаю что 
         {
             _databaseService = databaseService;
 
@@ -52,15 +52,15 @@ namespace MindMapAI.ViewModels
             LoadData();
         }
 
-        public ObservableCollection<Note> Notes { get; set; }
+        public ObservableCollection<Note> Notes { get; set; }   // Свойства
         public ObservableCollection<Tag> TagsForSelectedNote { get; set; }
         public ObservableCollection<Tag> AllTags { get; set; }
 
-        public ICommand AddNoteCommand { get;}
+        public ICommand AddNoteCommand { get;}  // Команды
         public ICommand DeleteNoteCommand { get;}
         public ICommand SaveNoteCommand { get; }
 
-        private void LoadData()
+        private void LoadData()     // Загрузка данных 
         {
             var notesFromDb = _databaseService.GetAllNotes();
             Notes.Clear();
@@ -80,7 +80,7 @@ namespace MindMapAI.ViewModels
             }
         }
 
-        private void AddNote()
+        private void AddNote()  // Добавление заметки
         {
             if (string.IsNullOrWhiteSpace(NewNoteTitle))
                 return;
@@ -98,6 +98,47 @@ namespace MindMapAI.ViewModels
 
                 NewNoteTitle = string.Empty;
                 NewNoteContent = string.Empty;
+        }
+
+        private void DeleteNote()   // Удаление заметки
+        {
+            if (SelectedNote == null)
+                return;
+
+            _databaseService.DeleteNote(SelectedNote.Id);
+            Notes.Remove(SelectedNote);
+            SelectedNote = null;
+        }
+
+        private bool CanDeleteNote() => SelectedNote != null;    // Валидация удаления заметки
+
+        private void SaveNote() // Сохранение заметки
+        {
+            if (SelectedNote == null)
+                return;
+
+            SelectedNote.UpdatedAt = DateTime.Now;
+            _databaseService.UpdateNote(SelectedNote);
+
+            var index = Notes.IndexOf(SelectedNote);
+            Notes[index] = SelectedNote;
+        }
+
+        private bool CanSaveNote() => SelectedNote != null;  // Валидация сохранения заметки 
+
+        private void LoadTagsForSelectedNote()   // Загрузка тегов для заметок
+        {
+            TagsForSelectedNote.Clear();
+
+            if (SelectedNote == null)
+                return;
+
+            var tags = _databaseService.GetTagsForNote(SelectedNote.Id);
+
+            foreach ( var tag in tags)
+            {
+                TagsForSelectedNote.Add(tag);
+            }
         }
     }
 }
