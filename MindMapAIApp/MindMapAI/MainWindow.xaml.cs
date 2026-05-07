@@ -8,6 +8,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using MindMapAI.ViewModels;
+using MindMapAICore.Services;
 
 namespace MindMapAI
 {
@@ -19,6 +21,11 @@ namespace MindMapAI
         public MainWindow()
         {
             InitializeComponent();
+
+            var datatbaseServise = new DatabaseService();
+            datatbaseServise.Initialize();
+
+            DataContext = new MainViewModel(datatbaseServise);
         }
     }
 }

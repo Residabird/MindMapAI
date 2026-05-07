@@ -4,10 +4,11 @@ using CommunityToolkit.Mvvm.Input;
 using MindMapAICore.Models;
 using System;
 using MindMapAICore.Services;
+using System.Linq;
 
 namespace MindMapAI.ViewModels
 {
-    public class MainViewModel : ViewModelBase  // тут не знаю что 
+    public class MainViewModel : ViewModelBase 
     {
         private readonly IDatabaseService _databaseService;
 
@@ -15,7 +16,7 @@ namespace MindMapAI.ViewModels
         private string _newNoteTitle = string.Empty;
         private string _newNoteContent = string.Empty;
 
-        public Note? SelectedNote   // тут не знаю что 
+        public Note? SelectedNote  
         {
             get => _selectedNote;
             set
@@ -25,7 +26,7 @@ namespace MindMapAI.ViewModels
             }
         }
 
-        public string NewNoteTitle  // тут не знаю что 
+        public string NewNoteTitle 
         {
             get => _newNoteTitle;
             set => SetField(ref _newNoteTitle, value);
@@ -37,7 +38,35 @@ namespace MindMapAI.ViewModels
             set => SetField(ref _newNoteContent, value);
         }
 
-        public MainViewModel(IDatabaseService databaseService)  //  тут не знаю что 
+        private string _filterTag = string.Empty;
+        public string FilterTag
+        {
+            get => _filterTag;
+            set
+            {
+                SetField(ref _filterTag, value);
+                OnPropertyChanged(nameof(FilteredNotes));
+            }
+        }
+
+        private string _tagsInput = string.Empty;
+        public string TagsInput
+        {
+            get => _tagsInput;
+            set => SetField(ref _tagsInput, value);
+        }
+
+        public List<Note> FilteredNotes
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(FilterTag)) return Notes.ToList();
+
+                return Notes.Where(n => _databaseService.GetTagsForNote(n.Id).Any(t => t.Name.Contains(FilterTag, StringComparison.OrdinalIgnoreCase))).ToList();
+            }
+        }
+
+        public MainViewModel(IDatabaseService databaseService)  
         {
             _databaseService = databaseService;
 
@@ -52,11 +81,11 @@ namespace MindMapAI.ViewModels
             LoadData();
         }
 
-        public ObservableCollection<Note> Notes { get; set; }   // Свойства
+        public ObservableCollection<Note> Notes { get; set; }   
         public ObservableCollection<Tag> TagsForSelectedNote { get; set; }
         public ObservableCollection<Tag> AllTags { get; set; }
 
-        public ICommand AddNoteCommand { get;}  // Команды
+        public ICommand AddNoteCommand { get;}  
         public ICommand DeleteNoteCommand { get;}
         public ICommand SaveNoteCommand { get; }
 

@@ -3,10 +3,292 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:MindMapAI"
+        xmlns:local="clr-namespace:MindMapAI.ViewModels"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        Title="MindMap AI" Height="720" Width="1280"
+        WindowStartupLocation="CenterScreen"
+        Background="#F5F7FA">
 
+    <Window.Resources>
+        <!-- Modern color palette -->
+        <SolidColorBrush x:Key="PrimaryBrush" Color="#2C3E50"/>
+        <SolidColorBrush x:Key="SecondaryBrush" Color="#3498DB"/>
+        <SolidColorBrush x:Key="AccentBrush" Color="#E74C3C"/>
+        <SolidColorBrush x:Key="SurfaceBrush" Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="BorderBrush" Color="#E1E8ED"/>
+        <SolidColorBrush x:Key="TextPrimary" Color="#2C3E50"/>
+        <SolidColorBrush x:Key="TextSecondary" Color="#7F8C8D"/>
+
+        <!-- Стиль для TextBox -->
+        <Style x:Key="ModernTextBox" TargetType="TextBox">
+            <Setter Property="Background" Value="#F8F9FA"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6">
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Стиль для Button -->
+        <Style x:Key="ModernButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource SecondaryBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                CornerRadius="6" 
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#2980B9"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="DangerButton" TargetType="Button" BasedOn="{StaticResource ModernButton}">
+            <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#C0392B"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Шаблон для отображения тегов в списке заметок -->
+        <ItemsControl x:Key="TagsControl" x:Shared="False">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border Background="#ECF0F1" 
+                            CornerRadius="12" 
+                            Padding="8,4" 
+                            Margin="0,0,5,0">
+                        <TextBlock Text="{Binding Name}" 
+                                   FontSize="10" 
+                                   Foreground="{StaticResource TextPrimary}"/>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <!-- Шаблон элемента заметки в списке -->
+        <DataTemplate x:Key="NoteItemTemplate">
+            <Border Background="{StaticResource SurfaceBrush}" 
+                    CornerRadius="8" 
+                    Margin="0,0,0,8" 
+                    Padding="12,10"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1"
+                    Cursor="Hand">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Text="{Binding Title}" 
+                               FontWeight="Bold" 
+                               FontSize="14" 
+                               Foreground="{StaticResource TextPrimary}"
+                               TextTrimming="CharacterEllipsis"/>
+
+                    <TextBlock Grid.Row="1" 
+                               Text="{Binding UpdatedAt, StringFormat='Updated: {0:MMM dd, yyyy}'}" 
+                               FontSize="11" 
+                               Foreground="{StaticResource TextSecondary}"
+                               Margin="0,5,0,0"/>
+
+                    <ItemsControl Grid.Row="2" 
+                                  ItemsSource="{Binding Tags}" 
+                                  Margin="0,8,0,0">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="#ECF0F1" 
+                                        CornerRadius="12" 
+                                        Padding="8,4" 
+                                        Margin="0,0,5,0">
+                                    <TextBlock Text="{Binding Name}" 
+                                               FontSize="10" 
+                                               Foreground="{StaticResource TextPrimary}"/>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </Window.Resources>
+
+    <Grid Margin="20">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="320"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Левая панель: список заметок -->
+        <Border Background="{StaticResource SurfaceBrush}" 
+                CornerRadius="12" 
+                BorderBrush="{StaticResource BorderBrush}" 
+                BorderThickness="1">
+            <Grid Margin="16">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Text="Мои заметки" 
+                           FontSize="18" 
+                           FontWeight="Bold" 
+                           Foreground="{StaticResource PrimaryBrush}"
+                           Margin="0,0,0,15"/>
+
+                <!-- Фильтр по тегам -->
+                <StackPanel Grid.Row="1" Margin="0,0,0,15">
+                    <TextBlock Text="Фильтр по тегу" 
+                               FontSize="12" 
+                               FontWeight="SemiBold" 
+                               Foreground="{StaticResource TextSecondary}"
+                               Margin="0,0,0,8"/>
+                    <TextBox Text="{Binding FilterTag, UpdateSourceTrigger=PropertyChanged}" 
+                             Style="{StaticResource ModernTextBox}"/>
+                </StackPanel>
+
+                <TextBlock Grid.Row="2" 
+                           Text="Все заметки (сортировка по дате изменения)" 
+                           FontSize="11" 
+                           Foreground="{StaticResource TextSecondary}"
+                           Margin="0,0,0,8"/>
+
+                <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto">
+                    <ListBox ItemsSource="{Binding FilteredNotes}" 
+                             SelectedItem="{Binding SelectedNote}"
+                             ItemTemplate="{StaticResource NoteItemTemplate}"
+                             Background="Transparent"
+                             BorderThickness="0"/>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+
+        <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" Background="Transparent"/>
+
+        <!-- Правая панель: редактор заметки -->
+        <Border Grid.Column="2" 
+                Background="{StaticResource SurfaceBrush}" 
+                CornerRadius="12" 
+                BorderBrush="{StaticResource BorderBrush}" 
+                BorderThickness="1">
+            <Grid Margin="20">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Кнопки действий -->
+                <WrapPanel Grid.Row="0" Margin="0,0,0,20">
+                    <Button Content="+ Новая заметка" 
+                            Command="{Binding AddNoteCommand}"
+                            Style="{StaticResource ModernButton}" 
+                            Margin="0,0,10,0"/>
+                    <Button Content="Сохранить" 
+                            Command="{Binding SaveNoteCommand}"
+                            Style="{StaticResource ModernButton}" 
+                            Margin="0,0,10,0"/>
+                    <Button Content="Удалить" 
+                            Command="{Binding DeleteNoteCommand}"
+                            Style="{StaticResource DangerButton}" 
+                            Margin="0,0,10,0"/>
+                </WrapPanel>
+
+                <!-- Заголовок -->
+                <StackPanel Grid.Row="1" Margin="0,0,0,15">
+                    <TextBlock Text="Заголовок" 
+                               FontSize="12" 
+                               FontWeight="SemiBold" 
+                               Foreground="{StaticResource TextSecondary}"
+                               Margin="0,0,0,5"/>
+                    <TextBox Text="{Binding SelectedNote.Title, UpdateSourceTrigger=PropertyChanged}" 
+                             Style="{StaticResource ModernTextBox}"
+                             FontSize="16"
+                             FontWeight="Bold"
+                             Padding="12,10"/>
+                </StackPanel>
+
+                <!-- Теги -->
+                <StackPanel Grid.Row="2" Margin="0,0,0,15">
+                    <TextBlock Text="Теги (через запятую)" 
+                               FontSize="12" 
+                               FontWeight="SemiBold" 
+                               Foreground="{StaticResource TextSecondary}"
+                               Margin="0,0,0,5"/>
+                    <TextBox Text="{Binding TagsInput, UpdateSourceTrigger=PropertyChanged}" 
+                             Style="{StaticResource ModernTextBox}"/>
+                </StackPanel>
+
+                <!-- Содержание -->
+                <StackPanel Grid.Row="3">
+                    <TextBlock Text="Содержание" 
+                               FontSize="12" 
+                               FontWeight="SemiBold" 
+                               Foreground="{StaticResource TextSecondary}"
+                               Margin="0,0,0,5"/>
+                    <TextBox Text="{Binding SelectedNote.Content, UpdateSourceTrigger=PropertyChanged}" 
+                             Style="{StaticResource ModernTextBox}"
+                             TextWrapping="Wrap"
+                             AcceptsReturn="True"
+                             VerticalScrollBarVisibility="Auto"
+                             Height="300"/>
+                </StackPanel>
+
+                <!-- Статус бар -->
+                <Border Grid.Row="4" 
+                        Background="#F0F2F5" 
+                        CornerRadius="8" 
+                        Padding="12,8" 
+                        Margin="0,15,0,0">
+                    <TextBlock Text="✓ Автосохранение в локальную базу данных (SQLite)" 
+                               FontSize="11" 
+                               Foreground="{StaticResource TextSecondary}"
+                               HorizontalAlignment="Center"/>
+                </Border>
+            </Grid>
+        </Border>
     </Grid>
 </Window>
