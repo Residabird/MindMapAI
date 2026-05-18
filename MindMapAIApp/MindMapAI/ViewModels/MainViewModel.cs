@@ -1,10 +1,11 @@
-﻿using System.Collections.ObjectModel;
-using System.Windows.Input;
-using CommunityToolkit.Mvvm.Input;
+﻿using CommunityToolkit.Mvvm.Input;
 using MindMapAICore.Models;
-using System;
 using MindMapAICore.Services;
+using System;
+using System.Collections.ObjectModel;
 using System.Linq;
+using System.Windows;
+using System.Windows.Input;
 
 namespace MindMapAI.ViewModels
 {
@@ -77,8 +78,11 @@ namespace MindMapAI.ViewModels
             AddNoteCommand = new RelayCommand(AddNote);
             DeleteNoteCommand = new RelayCommand(DeleteNote, CanDeleteNote);
             SaveNoteCommand = new RelayCommand(SaveNote, CanSaveNote);
+            ApplyFilterCommand = new RelayCommand(ApplyFilter);
 
             LoadData();
+
+            CommandManager.InvalidateRequerySuggested();    //-------------------------------------------------0
         }
 
         public ObservableCollection<Note> Notes { get; set; }   
@@ -88,6 +92,7 @@ namespace MindMapAI.ViewModels
         public ICommand AddNoteCommand { get;}  
         public ICommand DeleteNoteCommand { get;}
         public ICommand SaveNoteCommand { get; }
+        public ICommand ApplyFilterCommand { get;}
 
         private void LoadData()     // Загрузка данных 
         {
@@ -111,6 +116,14 @@ namespace MindMapAI.ViewModels
 
         private void AddNote()  // Добавление заметки
         {
+            MessageBox.Show($"AddNote вызван! NewNoteTitle = '{NewNoteTitle}'");
+
+            if (string.IsNullOrWhiteSpace(NewNoteTitle))
+            {
+                MessageBox.Show("Заголовок пустой! Заметка не создана.");
+                return;
+            }
+
             if (string.IsNullOrWhiteSpace(NewNoteTitle))
                 return;
 
@@ -119,7 +132,7 @@ namespace MindMapAI.ViewModels
                     Title = NewNoteTitle,
                     Content = NewNoteContent,
                     CreatedAt = DateTime.Now,
-                    UpdatedAt = DateTime.Now
+                    UpdatedAt = DateTime.Now 
                 };
 
                 _databaseService.AddNote(note);
@@ -131,12 +144,19 @@ namespace MindMapAI.ViewModels
 
         private void DeleteNote()   // Удаление заметки
         {
+
+            var result = MessageBox.Show($"Удалить заметку '{SelectedNote?.Title}'?", "Подтверждение", MessageBoxButton.YesNo);
+            if (result != MessageBoxResult.Yes)
+                return;
+
             if (SelectedNote == null)
                 return;
 
             _databaseService.DeleteNote(SelectedNote.Id);
             Notes.Remove(SelectedNote);
             SelectedNote = null;
+
+            MessageBox.Show("Заметка удалена!", "Успех", MessageBoxButton.OK);
         }
 
         private bool CanDeleteNote() => SelectedNote != null;    // Валидация удаления заметки
@@ -168,6 +188,11 @@ namespace MindMapAI.ViewModels
             {
                 TagsForSelectedNote.Add(tag);
             }
+        }
+
+        private void ApplyFilter()
+        {
+            OnPropertyChanged(nameof(FilteredNotes));
         }
     }
 }

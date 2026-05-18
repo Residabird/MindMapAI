@@ -1,9 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
+﻿using Microsoft.Data.Sqlite;
 using MindMapAICore.Models;
-using Microsoft.Data.Sqlite;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Text;
 
 namespace MindMapAICore.Services
 {
@@ -136,7 +137,9 @@ namespace MindMapAICore.Services
             using var command = new SqliteCommand(sql, connection);
             command.Parameters.AddWithValue("@id",id);
 
-            command.ExecuteNonQuery();
+            int rows = command.ExecuteNonQuery();
+
+            Debug.WriteLine($"Deleted {rows} rows");
         }
 
         public List<Tag> GetAllTags()   // Получение всех тегов
