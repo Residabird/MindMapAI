@@ -19,6 +19,7 @@ namespace MindMapAICore.Services
         void AddTagToNote(int noteId, int tagId);
         void RemoveTagFromNote(int noteId, int tagId);
         List<Tag> GetTagsForNote(int noteId);
+        void UpdateTag(Tag tag);
         List<Note> GetNotesByTag(int tagId);
     }
 }

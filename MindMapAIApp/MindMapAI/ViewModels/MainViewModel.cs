@@ -15,6 +15,7 @@ namespace MindMapAI.ViewModels
 
         private Note? _selectedNote;
         private string _newNoteTitle = string.Empty;
+        private bool _isSaving = false;
         private string _newNoteContent = string.Empty;
 
         public Note? SelectedNote  
@@ -22,8 +23,18 @@ namespace MindMapAI.ViewModels
             get => _selectedNote;
             set
             {
+                if (_selectedNote == value) return;
+
                 SetField(ref _selectedNote, value);
-                LoadTagsForSelectedNote();
+
+                if (value != null)
+                {
+                    LoadTagsForSelectedNote();
+                }
+                else
+                {
+                    TagsForSelectedNote.Clear();
+                }
             }
         }
 
@@ -61,9 +72,15 @@ namespace MindMapAI.ViewModels
         {
             get
             {
-                if (string.IsNullOrEmpty(FilterTag)) return Notes.ToList();
+                if (string.IsNullOrWhiteSpace(FilterTag))
+                    return Notes.ToList();
 
-                return Notes.Where(n => _databaseService.GetTagsForNote(n.Id).Any(t => t.Name.Contains(FilterTag, StringComparison.OrdinalIgnoreCase))).ToList();
+                var filter = FilterTag.ToLower();
+
+                return Notes.Where(n =>
+                    n.Title.ToLower().Contains(filter) ||
+                    _databaseService.GetTagsForNote(n.Id).Any(t => t.Name.ToLower().Contains(filter))
+                ).ToList();
             }
         }
 
@@ -82,7 +99,7 @@ namespace MindMapAI.ViewModels
 
             LoadData();
 
-            CommandManager.InvalidateRequerySuggested();    //-------------------------------------------------0
+            CommandManager.InvalidateRequerySuggested();    
         }
 
         public ObservableCollection<Note> Notes { get; set; }   
@@ -116,66 +133,85 @@ namespace MindMapAI.ViewModels
 
         private void AddNote()  // Добавление заметки
         {
-            MessageBox.Show($"AddNote вызван! NewNoteTitle = '{NewNoteTitle}'");
-
-            if (string.IsNullOrWhiteSpace(NewNoteTitle))
+            var newNote = new Note
             {
-                MessageBox.Show("Заголовок пустой! Заметка не создана.");
+                Title = "Новая заметка",
+                Content = "",
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
+            };
+
+            _databaseService.AddNote(newNote);
+            Notes.Add(newNote);
+
+            // Обновляем фильтрованный список
+            OnPropertyChanged(nameof(FilteredNotes));
+
+            SelectedNote = newNote;
+        }
+
+        private void DeleteNote()
+        {
+            if (SelectedNote == null)
+            {
+                MessageBox.Show("Не выбрана заметка для удаления", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(NewNoteTitle))
-                return;
-
-                var note = new Note
-                {
-                    Title = NewNoteTitle,
-                    Content = NewNoteContent,
-                    CreatedAt = DateTime.Now,
-                    UpdatedAt = DateTime.Now 
-                };
-
-                _databaseService.AddNote(note);
-                Notes.Add(note);
-
-                NewNoteTitle = string.Empty;
-                NewNoteContent = string.Empty;
-        }
-
-        private void DeleteNote()   // Удаление заметки
-        {
-
-            var result = MessageBox.Show($"Удалить заметку '{SelectedNote?.Title}'?", "Подтверждение", MessageBoxButton.YesNo);
+            var result = MessageBox.Show($"Удалить заметку '{SelectedNote.Title}'?", "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result != MessageBoxResult.Yes)
                 return;
 
-            if (SelectedNote == null)
-                return;
+            try
+            {
+                var noteToDelete = SelectedNote;
+                var noteIdToDelete = noteToDelete.Id;
+                var noteIndex = Notes.IndexOf(noteToDelete);
 
-            _databaseService.DeleteNote(SelectedNote.Id);
-            Notes.Remove(SelectedNote);
-            SelectedNote = null;
+                _databaseService.DeleteNote(noteIdToDelete);
 
-            MessageBox.Show("Заметка удалена!", "Успех", MessageBoxButton.OK);
+                var oldSelected = _selectedNote;
+                _selectedNote = null;
+
+                Notes.RemoveAt(noteIndex);
+
+                // Обновляем список
+                OnPropertyChanged(nameof(FilteredNotes));
+
+                if (Notes.Count > 0)
+                {
+                    var newIndex = noteIndex >= Notes.Count ? Notes.Count - 1 : noteIndex;
+                    SelectedNote = Notes[newIndex];
+                }
+                else
+                {
+                    SelectedNote = null;
+                }
+
+                MessageBox.Show("Заметка удалена!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при удалении: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private bool CanDeleteNote() => SelectedNote != null;    // Валидация удаления заметки
 
-        private void SaveNote() // Сохранение заметки
+        private void SaveNote()
         {
-            if (SelectedNote == null)
-                return;
+            if (SelectedNote == null) return;
 
             SelectedNote.UpdatedAt = DateTime.Now;
             _databaseService.UpdateNote(SelectedNote);
 
-            var index = Notes.IndexOf(SelectedNote);
-            Notes[index] = SelectedNote;
+            // Обновляем только фильтрованный список
+            OnPropertyChanged(nameof(FilteredNotes));
         }
 
-        private bool CanSaveNote() => SelectedNote != null;  // Валидация сохранения заметки 
+        private bool CanSaveNote() => SelectedNote != null;  // Валидация сохранения заметки
 
-        private void LoadTagsForSelectedNote()   // Загрузка тегов для заметок
+        public void LoadTagsForSelectedNote()   // Загрузка тегов для заметок
         {
             TagsForSelectedNote.Clear();
 

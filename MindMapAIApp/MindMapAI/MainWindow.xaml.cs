@@ -1,24 +1,32 @@
 ﻿using MindMapAI.ViewModels;
+using MindMapAICore.Models;
 using MindMapAICore.Services;
+using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Media;
 
 namespace MindMapAI
 {
     public partial class MainWindow : Window
     {
         private MainViewModel _viewModel;
+        private IDatabaseService _databaseService;
         private Point _lastContextMenuPosition;
-
+            
         public MainWindow()
         {
             InitializeComponent();
 
-            var databaseService = new DatabaseService();
-            databaseService.Initialize();
+            _databaseService = new DatabaseService();
+            _databaseService.Initialize();
 
-            _viewModel = new MainViewModel(databaseService);
+            _viewModel = new MainViewModel(_databaseService);
             DataContext = _viewModel;
+
+            this.Closing += MainWindow_Closing;
+
         }
 
         private void Settings_Click(object sender, RoutedEventArgs e)
@@ -45,6 +53,12 @@ namespace MindMapAI
         {
             if (_viewModel.AddNoteCommand.CanExecute(null))
                 _viewModel.AddNoteCommand.Execute(null);
+
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                TitleBox.Focus();
+                TitleBox.SelectAll();
+            }), System.Windows.Threading.DispatcherPriority.Background);
         }
 
         private void NewFolder_Click(object sender, RoutedEventArgs e)
@@ -52,9 +66,28 @@ namespace MindMapAI
             MessageBox.Show("Функция создания папок будет доступна в следующих версиях", "В разработке", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
+        private T FindParent<T>(DependencyObject child) where T : DependencyObject
+        {
+            while (child != null)
+            {
+                if (child is T parent)
+                    return parent;
+                child = VisualTreeHelper.GetParent(child);
+            }
+            return null;
+        }
+
         private void MoreButton_Click(object sender, RoutedEventArgs e)
         {
             var button = sender as Button;
+            var listBoxItem = FindParent<ListBoxItem>(button);
+            var note = listBoxItem?.DataContext as Note;
+
+            if (note == null) return;
+
+            // Временно выбираем заметку
+            _viewModel.SelectedNote = note;
+
             var contextMenu = new ContextMenu();
 
             var deleteItem = new MenuItem { Header = "🗑 Удалить заметку" };
@@ -67,14 +100,28 @@ namespace MindMapAI
             };
 
             addTagItem.Click += (s, args) => {
-
-                MessageBox.Show("Окно добавления тегов будет здесь", "Добавление тегов", MessageBoxButton.OK, MessageBoxImage.Information);
+                var tagWindow = new TagManagerWindow(
+                    _databaseService, 
+                    note.Id,
+                    new ObservableCollection<Tag>(_viewModel.TagsForSelectedNote)
+                );
+                tagWindow.Owner = this;
+                tagWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                tagWindow.ShowDialog();
+                _viewModel.LoadTagsForSelectedNote();
             };
 
             viewTagsItem.Click += (s, args) => {
-
-                if (_viewModel.SelectedNote != null)
-                    MessageBox.Show($"Теги заметки '{_viewModel.SelectedNote.Title}':\n\n(пока не реализовано)", "Теги заметки", MessageBoxButton.OK, MessageBoxImage.Information);
+                var tags = _viewModel.TagsForSelectedNote;
+                if (tags.Count == 0)
+                {
+                    MessageBox.Show("У этой заметки нет тегов", "Теги", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                else
+                {
+                    var tagsList = string.Join(", ", tags.Select(t => t.Name));
+                    MessageBox.Show($"Теги заметки: {tagsList}", "Теги", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
             };
 
             contextMenu.Items.Add(deleteItem);
@@ -101,6 +148,15 @@ namespace MindMapAI
         {
 
             MessageBox.Show("ИИ-ассистент поможет анализировать заметки и генерировать теги\n\n(функция будет доступна в версии 2.0)", "MindMap AI Assistant", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            // Сохраняем текущую заметку при закрытии
+            if (_viewModel.SelectedNote != null)
+            {
+                _viewModel.SaveNoteCommand.Execute(null);
+            }
         }
     }
 }

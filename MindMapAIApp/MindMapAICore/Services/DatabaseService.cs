@@ -314,5 +314,19 @@ namespace MindMapAICore.Services
             return notes;
         }
 
+        public void UpdateTag(Tag tag)
+        {
+            using var connection = new SqliteConnection(_connectionString);
+            connection.Open();
+
+            string sql = "UPDATE Tags SET Name = @name WHERE Id = @id";
+
+            using var command = new SqliteCommand(sql, connection);
+            command.Parameters.AddWithValue("@name", tag.Name);
+            command.Parameters.AddWithValue("@id", tag.Id);
+
+            command.ExecuteNonQuery();
+        }
+
     }
 }
