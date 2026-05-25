@@ -8,9 +8,10 @@
         Title="MindMap AI" Height="720" Width="1280"
         MinHeight="600" MinWidth="1024"
         WindowStartupLocation="CenterScreen"
-        Background="#1E1E2E">
+        Background="#1E1E2E" Icon="/5312109199615980320.jpg">
 
     <Window.Resources>
+        <!-- Кисти -->
         <SolidColorBrush x:Key="TopBarBg" Color="#64646D"/>
         <SolidColorBrush x:Key="LeftPanelBg" Color="#424245"/>
         <SolidColorBrush x:Key="EditorBg" Color="#1E1E2E"/>
@@ -22,8 +23,12 @@
         <SolidColorBrush x:Key="ItemSelectedBg" Color="#5A5A64"/>
         <SolidColorBrush x:Key="AIBtnBg" Color="#424245"/>
 
+        <!-- Конвертеры -->
         <local:IsNotNullConverter x:Key="IsNotNullConverter"/>
+        <local:CountToVisibilityConverter x:Key="CountToVisibilityConverter"/>
+        <local:LastTagVisibilityConverter x:Key="LastTagVisibilityConverter"/>
 
+        <!-- Стиль для кнопок-иконок -->
         <Style x:Key="IconButton" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
@@ -48,6 +53,7 @@
             </Style.Triggers>
         </Style>
 
+        <!-- Стиль для круглой кнопки ИИ -->
         <Style x:Key="RoundIconButton" TargetType="Button">
             <Setter Property="Background" Value="{StaticResource AIBtnBg}"/>
             <Setter Property="BorderThickness" Value="0"/>
@@ -58,7 +64,7 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border Background="{TemplateBinding Background}"
-                        CornerRadius="37.5">
+                                CornerRadius="37.5">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                     </ControlTemplate>
@@ -71,7 +77,41 @@
             </Style.Triggers>
         </Style>
 
-        <!-- Стиль для вертикального скроллбара -->
+        <!-- Стиль для кнопки-тега -->
+        <Style x:Key="TagButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="#89B4FA"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontStyle" Value="Italic"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0,0,3,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <TextBlock Text="{Binding Content, RelativeSource={RelativeSource TemplatedParent}}"
+                                   Foreground="{TemplateBinding Foreground}"
+                                   FontStyle="{TemplateBinding FontStyle}"
+                                   FontSize="{TemplateBinding FontSize}"
+                                   Cursor="{TemplateBinding Cursor}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Foreground" Value="#6C9FEF"/>
+                                            <Setter Property="TextDecorations" Value="Underline"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Стиль для скроллбара -->
         <Style x:Key="ModernScrollBar" TargetType="ScrollBar">
             <Setter Property="Width" Value="8"/>
             <Setter Property="Template">
@@ -83,9 +123,7 @@
                                     <Thumb>
                                         <Thumb.Template>
                                             <ControlTemplate TargetType="Thumb">
-                                                <Border Background="#55555E" 
-                                                CornerRadius="4"
-                                                Height="40"/>
+                                                <Border Background="#55555E" CornerRadius="4" Height="40"/>
                                             </ControlTemplate>
                                         </Thumb.Template>
                                     </Thumb>
@@ -102,7 +140,7 @@
             </Setter>
         </Style>
 
-        <!-- Стиль для ScrollViewer с красивым скроллом -->
+        <!-- Стиль для ScrollViewer -->
         <Style TargetType="ScrollViewer">
             <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
             <Setter Property="Template">
@@ -115,19 +153,20 @@
                             </Grid.ColumnDefinitions>
                             <ScrollContentPresenter Grid.Column="0"/>
                             <ScrollBar x:Name="PART_VerticalScrollBar"
-                               Grid.Column="1"
-                               Style="{StaticResource ModernScrollBar}"
-                               Orientation="Vertical"
-                               Minimum="0"
-                               Maximum="{TemplateBinding ScrollableHeight}"
-                               ViewportSize="{TemplateBinding ViewportHeight}"
-                               Value="{Binding VerticalOffset, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}"/>
+                                       Grid.Column="1"
+                                       Style="{StaticResource ModernScrollBar}"
+                                       Orientation="Vertical"
+                                       Minimum="0"
+                                       Maximum="{TemplateBinding ScrollableHeight}"
+                                       ViewportSize="{TemplateBinding ViewportHeight}"
+                                       Value="{Binding VerticalOffset, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}"/>
                         </Grid>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
-        
+
+        <!-- Стиль элемента списка заметок -->
         <Style x:Key="NoteItemStyle" TargetType="ListBoxItem">
             <Setter Property="Height" Value="31"/>
             <Setter Property="Background" Value="Transparent"/>
@@ -140,7 +179,7 @@
                                 Background="{TemplateBinding Background}"
                                 BorderThickness="0"
                                 CornerRadius="0">
-                            <Grid Margin="0,0,0,0">
+                            <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
@@ -151,8 +190,7 @@
                                 <Button x:Name="MoreButton"
                                         Grid.Column="1"
                                         Style="{StaticResource IconButton}"
-                                        Width="24"
-                                        Height="24"
+                                        Width="24" Height="24"
                                         Margin="0,0,8,0"
                                         Visibility="Collapsed"
                                         Click="MoreButton_Click">
@@ -175,6 +213,7 @@
             </Setter>
         </Style>
 
+        <!-- Шаблон заметки в списке -->
         <DataTemplate x:Key="NoteItemTemplate">
             <TextBlock Text="{Binding Title}" 
                        FontSize="13"
@@ -189,6 +228,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
+        <!-- Верхняя панель -->
         <Border Grid.Row="0" Background="{StaticResource TopBarBg}">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -201,14 +241,8 @@
                     <Button Style="{StaticResource IconButton}" Margin="0,0,13,0" Click="Settings_Click">
                         <Image Source="/Assets/Images/settings-icon.png" Width="22" Height="22"/>
                     </Button>
-                    <Button Style="{StaticResource IconButton}" Margin="0,0,13,0" Click="Graph_Click">
+                    <Button Style="{StaticResource IconButton}" Margin="0,0,13,0" Click="Graph_Click" >
                         <Image Source="/Assets/Images/graph-icon.png" Width="22" Height="22"/>
-                    </Button>
-                    <Button Style="{StaticResource IconButton}" Margin="0,0,10,0" Click="Back_Click">
-                        <Image Source="/Assets/Images/back-icon.png" Width="24" Height="24"/>
-                    </Button>
-                    <Button Style="{StaticResource IconButton}" Click="Forward_Click">
-                        <Image Source="/Assets/Images/forward-icon.png" Width="24" Height="24"/>
                     </Button>
                 </StackPanel>
 
@@ -248,12 +282,14 @@
             </Grid>
         </Border>
 
+        <!-- Основная область -->
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="275"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
+            <!-- Левая панель -->
             <Border Grid.Column="0" Background="{StaticResource LeftPanelBg}">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -292,9 +328,43 @@
                 </Grid>
             </Border>
 
-            <Border Grid.Column="1" Background="{StaticResource EditorBg}">
+            <!-- Правая панель — редактор -->
+            <Border Grid.Column="2" Background="{StaticResource EditorBg}">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="40,30,40,20">
                     <StackPanel>
+                        <!-- Блок с тегами заметки -->
+                        <StackPanel Margin="0,0,0,5">
+                            <TextBlock Text="Теги заметки" 
+                                       FontSize="11" 
+                                       Foreground="#A6ADC8" 
+                                       Margin="0,0,0,5"
+                                       Visibility="{Binding TagsForSelectedNote.Count, Converter={StaticResource CountToVisibilityConverter}}"/>
+                            <ItemsControl ItemsSource="{Binding TagsForSelectedNote}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Button Content="{Binding Name}" 
+                                                    Style="{StaticResource TagButtonStyle}"
+                                                    Click="TagButton_Click"
+                                                    Tag="{Binding}"/>
+                                            <TextBlock Text=" / " 
+                                                       FontSize="11" 
+                                                       Foreground="#55555E"
+                                                       FontStyle="Italic"
+                                                       VerticalAlignment="Center"
+                                                       Visibility="{Binding RelativeSource={RelativeSource PreviousData}, Converter={StaticResource LastTagVisibilityConverter}}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+
+                        <!-- Заголовок -->
                         <TextBox x:Name="TitleBox"
                                  Text="{Binding SelectedNote.Title, UpdateSourceTrigger=PropertyChanged}"
                                  FontSize="24"
@@ -303,6 +373,7 @@
                                  Background="Transparent"
                                  BorderThickness="0"
                                  Padding="0,0,0,5"
+                                 Margin="0,10,0,0"
                                  CaretBrush="White"
                                  IsEnabled="{Binding SelectedNote, Converter={StaticResource IsNotNullConverter}}">
                             <TextBox.Template>
@@ -325,8 +396,10 @@
                             </TextBox.Template>
                         </TextBox>
 
+                        <!-- Разделитель -->
                         <Border Height="1" Background="#313244" Margin="0,15,0,20"/>
 
+                        <!-- Содержание -->
                         <TextBox x:Name="ContentBox"
                                  Text="{Binding SelectedNote.Content, UpdateSourceTrigger=PropertyChanged}"
                                  FontSize="16"
@@ -361,6 +434,7 @@
             </Border>
         </Grid>
 
+        <!-- Кнопка ИИ-бота -->
         <Button x:Name="AIBotButton"
                 Width="74" Height="75"
                 HorizontalAlignment="Right" VerticalAlignment="Bottom"

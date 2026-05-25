@@ -9,18 +9,21 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="5312109199615980320.jpg" />
     <None Remove="Assets\Images\add-new-file-icon.png" />
     <None Remove="Assets\Images\add-new-folder-icon.png" />
     <None Remove="Assets\Images\ai-helper-icon.png" />
-    <None Remove="Assets\Images\back-icon.png" />
-    <None Remove="Assets\Images\forward-icon.png" />
+    <None Remove="Assets\Images\close-icon.png" />
     <None Remove="Assets\Images\graph-icon.png" />
     <None Remove="Assets\Images\more-button-icon.png" />
+    <None Remove="Assets\Images\pencil-icon.png" />
     <None Remove="Assets\Images\search-icon.png" />
     <None Remove="Assets\Images\settings-icon.png" />
+    <None Remove="Assets\Images\trash.png" />
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Styles\" />
     <Folder Include="Views\" />
   </ItemGroup>
 
@@ -33,6 +36,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="5312109199615980320.jpg" />
     <Resource Include="Assets\Images\add-new-file-icon.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
@@ -42,10 +46,7 @@
     <Resource Include="Assets\Images\ai-helper-icon.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Assets\Images\back-icon.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Assets\Images\forward-icon.png">
+    <Resource Include="Assets\Images\close-icon.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Assets\Images\graph-icon.png">
@@ -54,10 +55,16 @@
     <Resource Include="Assets\Images\more-button-icon.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Assets\Images\pencil-icon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Assets\Images\search-icon.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Assets\Images\settings-icon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\Images\trash.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>

@@ -5,15 +5,13 @@ using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Media;
 
 namespace MindMapAI
 {
     public partial class MainWindow : Window
     {
         private MainViewModel _viewModel;
-        private IDatabaseService _databaseService;
-        private Point _lastContextMenuPosition;
+        private readonly IDatabaseService _databaseService;
             
         public MainWindow()
         {
@@ -66,7 +64,7 @@ namespace MindMapAI
             MessageBox.Show("Функция создания папок будет доступна в следующих версиях", "В разработке", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
-        private T FindParent<T>(DependencyObject child) where T : DependencyObject
+        private static T? FindParent<T>(DependencyObject child) where T : DependencyObject
         {
             while (child != null)
             {
@@ -79,57 +77,23 @@ namespace MindMapAI
 
         private void MoreButton_Click(object sender, RoutedEventArgs e)
         {
-            var button = sender as Button;
-            var listBoxItem = FindParent<ListBoxItem>(button);
-            var note = listBoxItem?.DataContext as Note;
+            if (sender is not Button button) return;
+            if (FindParent<ListBoxItem>(button)?.DataContext is not Note note) return;
 
-            if (note == null) return;
-
-            // Временно выбираем заметку
             _viewModel.SelectedNote = note;
 
             var contextMenu = new ContextMenu();
-
             var deleteItem = new MenuItem { Header = "🗑 Удалить заметку" };
-            var addTagItem = new MenuItem { Header = "🏷 Добавить теги" };
-            var viewTagsItem = new MenuItem { Header = "👁 Посмотреть теги" };
+            var addTagItem = new MenuItem { Header = "🏷 Теги" };
 
-            deleteItem.Click += (s, args) => {
-                if (_viewModel.DeleteNoteCommand.CanExecute(null))
-                    _viewModel.DeleteNoteCommand.Execute(null);
-            };
-
-            addTagItem.Click += (s, args) => {
-                var tagWindow = new TagManagerWindow(
-                    _databaseService, 
-                    note.Id,
-                    new ObservableCollection<Tag>(_viewModel.TagsForSelectedNote)
-                );
-                tagWindow.Owner = this;
-                tagWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-                tagWindow.ShowDialog();
-                _viewModel.LoadTagsForSelectedNote();
-            };
-
-            viewTagsItem.Click += (s, args) => {
-                var tags = _viewModel.TagsForSelectedNote;
-                if (tags.Count == 0)
-                {
-                    MessageBox.Show("У этой заметки нет тегов", "Теги", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-                else
-                {
-                    var tagsList = string.Join(", ", tags.Select(t => t.Name));
-                    MessageBox.Show($"Теги заметки: {tagsList}", "Теги", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-            };
+            deleteItem.Click += (s, args) => _viewModel.DeleteNoteCommand.Execute(null);
+            addTagItem.Click += (s, args) => OpenTagManagerForCurrentNote();
 
             contextMenu.Items.Add(deleteItem);
             contextMenu.Items.Add(addTagItem);
-            contextMenu.Items.Add(viewTagsItem);
 
             button.ContextMenu = contextMenu;
-            button.ContextMenu.IsOpen = true;
+            button.ContextMenu!.IsOpen = true;
         }
 
         private void SaveNote_Click(object sender, RoutedEventArgs e)
@@ -150,13 +114,33 @@ namespace MindMapAI
             MessageBox.Show("ИИ-ассистент поможет анализировать заметки и генерировать теги\n\n(функция будет доступна в версии 2.0)", "MindMap AI Assistant", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
-        private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
         {
             // Сохраняем текущую заметку при закрытии
             if (_viewModel.SelectedNote != null)
             {
                 _viewModel.SaveNoteCommand.Execute(null);
             }
+        }
+
+        private void TagButton_Click(object sender, RoutedEventArgs e)
+        {
+            OpenTagManagerForCurrentNote();
+        }
+
+        private void OpenTagManagerForCurrentNote()
+        {
+            if (_viewModel.SelectedNote == null) return;
+
+            var tagWindow = new TagManagerWindow(
+                _databaseService,
+                _viewModel.SelectedNote.Id,
+                new ObservableCollection<Tag>(_viewModel.TagsForSelectedNote)
+            );
+            tagWindow.Owner = this;
+            tagWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+            tagWindow.ShowDialog();
+            _viewModel.LoadTagsForSelectedNote();
         }
     }
 }

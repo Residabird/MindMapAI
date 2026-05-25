@@ -9,21 +9,23 @@ using System.Windows.Input;
 
 namespace MindMapAI.ViewModels
 {
-    public class MainViewModel : ViewModelBase 
+    public class MainViewModel : ViewModelBase
     {
         private readonly IDatabaseService _databaseService;
 
         private Note? _selectedNote;
         private string _newNoteTitle = string.Empty;
-        private bool _isSaving = false;
+        private int? _currentNoteId = null;
         private string _newNoteContent = string.Empty;
 
-        public Note? SelectedNote  
+        public Note? SelectedNote
         {
             get => _selectedNote;
             set
             {
                 if (_selectedNote == value) return;
+
+                int? previousId = _selectedNote?.Id; 
 
                 SetField(ref _selectedNote, value);
 
@@ -35,10 +37,11 @@ namespace MindMapAI.ViewModels
                 {
                     TagsForSelectedNote.Clear();
                 }
+                CommandManager.InvalidateRequerySuggested();
             }
         }
 
-        public string NewNoteTitle 
+        public string NewNoteTitle
         {
             get => _newNoteTitle;
             set => SetField(ref _newNoteTitle, value);
@@ -84,7 +87,7 @@ namespace MindMapAI.ViewModels
             }
         }
 
-        public MainViewModel(IDatabaseService databaseService)  
+        public MainViewModel(IDatabaseService databaseService)
         {
             _databaseService = databaseService;
 
@@ -99,17 +102,17 @@ namespace MindMapAI.ViewModels
 
             LoadData();
 
-            CommandManager.InvalidateRequerySuggested();    
+            CommandManager.InvalidateRequerySuggested();
         }
 
-        public ObservableCollection<Note> Notes { get; set; }   
+        public ObservableCollection<Note> Notes { get; set; }
         public ObservableCollection<Tag> TagsForSelectedNote { get; set; }
         public ObservableCollection<Tag> AllTags { get; set; }
 
-        public ICommand AddNoteCommand { get;}  
-        public ICommand DeleteNoteCommand { get;}
+        public ICommand AddNoteCommand { get; }
+        public ICommand DeleteNoteCommand { get; }
         public ICommand SaveNoteCommand { get; }
-        public ICommand ApplyFilterCommand { get;}
+        public ICommand ApplyFilterCommand { get; }
 
         private void LoadData()     // Загрузка данных 
         {
@@ -170,7 +173,6 @@ namespace MindMapAI.ViewModels
 
                 _databaseService.DeleteNote(noteIdToDelete);
 
-                var oldSelected = _selectedNote;
                 _selectedNote = null;
 
                 Notes.RemoveAt(noteIndex);
@@ -196,7 +198,7 @@ namespace MindMapAI.ViewModels
             }
         }
 
-        private bool CanDeleteNote() => SelectedNote != null;    // Валидация удаления заметки
+        private bool CanDeleteNote() => SelectedNote != null;
 
         private void SaveNote()
         {
@@ -220,7 +222,7 @@ namespace MindMapAI.ViewModels
 
             var tags = _databaseService.GetTagsForNote(SelectedNote.Id);
 
-            foreach ( var tag in tags)
+            foreach (var tag in tags)
             {
                 TagsForSelectedNote.Add(tag);
             }

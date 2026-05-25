@@ -27,20 +27,13 @@ namespace MindMapAI
             TagsListBox.ItemsSource = Tags;
         }
 
-        private void NewTagButton_Click(object sender, RoutedEventArgs e)
-        {
-            NewTagButton.Visibility = Visibility.Collapsed;
-            NewTagBox.Visibility = Visibility.Visible;
-            NewTagBox.Focus();
-        }
-
         private void NewTagBox_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
                 e.Handled = true;
 
-                string tagName = NewTagBox?.Text?.Trim();
+                string tagName = NewTagBox.Text?.Trim() ?? string.Empty;
                 if (string.IsNullOrWhiteSpace(tagName))
                 {
                     CancelNewTag();
@@ -146,6 +139,13 @@ namespace MindMapAI
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
+        }
+
+        private void NewTagButton_Click(object sender, RoutedEventArgs e)
+        {
+            NewTagBox.Visibility = Visibility.Visible;
+            NewTagButton.Visibility = Visibility.Collapsed;
+            NewTagBox.Focus();
         }
 
     }

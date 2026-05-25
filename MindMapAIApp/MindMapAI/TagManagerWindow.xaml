@@ -75,17 +75,17 @@
                                         Cursor="Hand"
                                         Visibility="Collapsed"
                                         Click="EditTag_Click">
-                                    <Image Source="/Assets/Images/edit-icon.png" Width="16" Height="16"/>
+                                    <Image Source="/Assets/Images/pencil-icon.png" Width="16" Height="16"/>
                                 </Button>
                                 <Button x:Name="DeleteTagBtn"
                                         Grid.Column="2"
                                         Width="20" Height="20"
                                         Background="Transparent"
-                                        BorderThickness="0"
-                                        Cursor="Hand"
+                                        BorderThickness="0"         
+                                        Cursor="Hand"   
                                         Visibility="Collapsed"
                                         Click="DeleteTag_Click">
-                                    <Image Source="/Assets/Images/delete-icon.png" Width="16" Height="16"/>
+                                    <Image Source="/Assets/Images/trash.png" Width="16" Height="16"/>
                                 </Button>
                             </Grid>
                         </Border>
@@ -130,25 +130,27 @@
         CornerRadius="12"
         BorderBrush="{StaticResource BorderColor}"
         BorderThickness="1">
-        <Grid Margin="15">
+        <Grid Margin="15,25,18,15">
             <!-- Кнопка закрытия (крестик) -->
             <Button x:Name="CloseButton"
-                Content="✖"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Top"
-                Width="30" Height="30"
-                Background="Transparent"
-                BorderThickness="0"
-                Foreground="{StaticResource TextSecondary}"
-                Cursor="Hand"
-                FontSize="14"
-                Click="CloseButton_Click"
-                Margin="0,-5,-5,0"/>
+        HorizontalAlignment="Right"
+        VerticalAlignment="Top"
+        Width="30" 
+        Height="30"
+        Margin="0,-5,-5,0"
+        Background="Transparent"
+        BorderThickness="0"
+        Cursor="Hand"
+        Click="CloseButton_Click">
+                <Image Source="/Assets/Images/close-icon.png" 
+           Width="30" 
+           Height="30"/>
+            </Button>
 
             <Border Background="{StaticResource BgPrimary}"
             CornerRadius="12"
             BorderBrush="{StaticResource BorderColor}"
-            BorderThickness="1">
+            BorderThickness="1" Margin="0,16,0,0">
                 <Grid Margin="15">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
