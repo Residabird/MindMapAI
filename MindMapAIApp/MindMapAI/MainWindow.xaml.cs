@@ -29,7 +29,7 @@ namespace MindMapAI
 
         }
 
-        private void Settings_Click(object sender, RoutedEventArgs e)
+        private void Settings_Click(object sender, RoutedEventArgs e)  
         {
             var settingsWindow = new SettingsWindow();
             settingsWindow.Owner = this;
@@ -85,6 +85,10 @@ namespace MindMapAI
             return null;
         }
 
+        /// <summary>
+        /// Открывает контекстное меню для заметки (три точки).
+        /// Позволяет удалить заметку или управлять тегами.
+        /// </summary>
         private void MoreButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender is not Button button) return;

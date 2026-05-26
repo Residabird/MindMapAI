@@ -25,7 +25,7 @@ namespace MindMapAI.ViewModels
             {
                 if (_selectedNote == value) return;
 
-                int? previousId = _selectedNote?.Id; 
+                int? previousId = _selectedNote?.Id;
 
                 SetField(ref _selectedNote, value);
 

@@ -12,14 +12,19 @@ namespace MindMapAICore.Services
     {
         private readonly string _connectionString;
 
-        public DatabaseService()        //Путь к БД
+        public DatabaseService()
         {
             string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             string dbFolder = Path.Combine(appDataPath, "MindMapAI");
             Directory.CreateDirectory(dbFolder);
             string dbPath = Path.Combine(dbFolder, "notes.db");
-
             _connectionString = $"Data Source={dbPath};";
+        }
+
+        // Конструктор для тестов (принимает строку подключения)
+        public DatabaseService(string connectionString)
+        {
+            _connectionString = connectionString;
         }
 
         public void Initialize() // Инициализация , создание таблиц
