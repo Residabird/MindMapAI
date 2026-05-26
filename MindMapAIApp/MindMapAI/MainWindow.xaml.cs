@@ -17,6 +17,8 @@ namespace MindMapAI
         {
             InitializeComponent();
 
+            ApplySettings();
+
             _databaseService = new DatabaseService();
             _databaseService.Initialize();
 
@@ -29,7 +31,13 @@ namespace MindMapAI
 
         private void Settings_Click(object sender, RoutedEventArgs e)
         {
-            // TODO: открыть окно настроек
+            var settingsWindow = new SettingsWindow();
+            settingsWindow.Owner = this;
+            settingsWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+            if (settingsWindow.ShowDialog() == true)
+            {
+                ApplySettings();
+            }
         }
 
         private void Graph_Click(object sender, RoutedEventArgs e)
@@ -149,6 +157,12 @@ namespace MindMapAI
             tagWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             tagWindow.ShowDialog();
             _viewModel.LoadTagsForSelectedNote();
+        }
+
+        private void ApplySettings()
+        {
+            int fontSize = Properties.Settings.Default.EditorFontSize;
+            ContentBox.FontSize = fontSize;
         }
     }
 }
