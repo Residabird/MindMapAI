@@ -36,7 +36,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="5312109199615980320.jpg" />
     <Resource Include="Assets\Images\add-new-file-icon.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>

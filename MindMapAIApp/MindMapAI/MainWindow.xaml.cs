@@ -34,17 +34,13 @@ namespace MindMapAI
 
         private void Graph_Click(object sender, RoutedEventArgs e)
         {
-            // TODO: граф связей 
-        }
-
-        private void Back_Click(object sender, RoutedEventArgs e)
-        {
-            // TODO: навигация назад
-        }
-
-        private void Forward_Click(object sender, RoutedEventArgs e)
-        {
-            // TODO: навигация вперёд
+            MessageBox.Show(
+            "Функция «Граф связей» будет доступна в версии 2.0\n\n" +
+            "Она позволит визуализировать связи между заметками через общие теги.",
+            "В разработке",
+            MessageBoxButton.OK,
+            MessageBoxImage.Information
+            );
         }
 
         private void NewNote_Click(object sender, RoutedEventArgs e)
@@ -61,7 +57,13 @@ namespace MindMapAI
 
         private void NewFolder_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Функция создания папок будет доступна в следующих версиях", "В разработке", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(
+        "Функция «Папки» позволит группировать заметки по категориям.\n\n" +
+        "Ожидается в версии 1.5 или 2.0.",
+        "В разработке",
+        MessageBoxButton.OK,
+        MessageBoxImage.Information
+            );
         }
 
         private static T? FindParent<T>(DependencyObject child) where T : DependencyObject
@@ -111,7 +113,13 @@ namespace MindMapAI
         private void AIBot_Click(object sender, RoutedEventArgs e)
         {
 
-            MessageBox.Show("ИИ-ассистент поможет анализировать заметки и генерировать теги\n\n(функция будет доступна в версии 2.0)", "MindMap AI Assistant", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(
+                "ИИ-ассистент поможет автоматически анализировать заметки и генерировать теги.\n\n" +
+                "Функция будет доступна в версии 2.0.",
+                "В разработке",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information
+            );
         }
 
         private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)

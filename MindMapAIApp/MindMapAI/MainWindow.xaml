@@ -8,7 +8,9 @@
         Title="MindMap AI" Height="720" Width="1280"
         MinHeight="600" MinWidth="1024"
         WindowStartupLocation="CenterScreen"
-        Background="#1E1E2E" Icon="/5312109199615980320.jpg">
+        Background="#1E1E2E" 
+        FocusManager.FocusedElement="{Binding ElementName=NotesListBox}"
+        KeyboardNavigation.TabNavigation="Cycle">
 
     <Window.Resources>
         <!-- Кисти -->
@@ -238,10 +240,14 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="11,8,0,0">
-                    <Button Style="{StaticResource IconButton}" Margin="0,0,13,0" Click="Settings_Click">
+                    <Button Style="{StaticResource IconButton}" Margin="0,0,13,0" Click="Settings_Click"
+                            AutomationProperties.Name="Настройки"
+                            AutomationProperties.HelpText="Открыть окно настроек приложения">
                         <Image Source="/Assets/Images/settings-icon.png" Width="22" Height="22"/>
                     </Button>
-                    <Button Style="{StaticResource IconButton}" Margin="0,0,13,0" Click="Graph_Click" >
+                    <Button Style="{StaticResource IconButton}" Margin="0,0,13,0" Click="Graph_Click"
+                            AutomationProperties.Name="Граф связей"
+                            AutomationProperties.HelpText="Показать визуализацию связей между заметками">
                         <Image Source="/Assets/Images/graph-icon.png" Width="22" Height="22"/>
                     </Button>
                 </StackPanel>
@@ -250,6 +256,8 @@
                     <Image Source="/Assets/Images/search-icon.png" Width="19" Height="19" Margin="0,0,8,0"/>
                     <Border BorderBrush="White" BorderThickness="0,0,0,1" Width="365">
                         <TextBox x:Name="SearchBox"
+                                 AutomationProperties.Name="Поиск заметок"
+                                 AutomationProperties.HelpText="Введите текст для поиска по заголовку или тегам"
                                  Text="{Binding FilterTag, UpdateSourceTrigger=PropertyChanged}"
                                  Background="Transparent"
                                  BorderThickness="0"
@@ -302,7 +310,10 @@
                                 Style="{StaticResource IconButton}"
                                 Margin="0,0,15,0"
                                 Click="NewNote_Click"
-                                ToolTip="Создать заметку">
+                                ToolTip="Создать заметку"
+                                AutomationProperties.Name="Создать заметку"
+                                AutomationProperties.HelpText="Создаёт новую заметку с заголовком по умолчанию"
+                                TabIndex="1">
                             <Image Source="/Assets/Images/add-new-file-icon.png" Width="22" Height="22"/>
                         </Button>
                         <Button x:Name="NewFolderBtn"
@@ -310,13 +321,18 @@
                                 Click="NewFolder_Click"
                                 ToolTip="Создать папку"
                                 IsEnabled="False"
-                                Opacity="0.5">
+                                Opacity="0.5"
+                                AutomationProperties.Name="Создать папку (недоступно)"
+                                AutomationProperties.HelpText="Функция будет добавлена в следующих версиях"
+                                TabIndex="2">
                             <Image Source="/Assets/Images/add-new-folder-icon.png" Width="22" Height="22"/>
                         </Button>
                     </StackPanel>
 
                     <ListBox x:Name="NotesListBox"
                              Grid.Row="1"
+                             AutomationProperties.Name="Список заметок"
+                             AutomationProperties.HelpText="Используйте стрелки для выбора заметки"
                              ItemsSource="{Binding FilteredNotes}"
                              SelectedItem="{Binding SelectedNote, Mode=TwoWay}"
                              ItemTemplate="{StaticResource NoteItemTemplate}"
@@ -324,7 +340,8 @@
                              Background="Transparent"
                              BorderThickness="0"
                              Margin="0,10,0,0"
-                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"/>
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             TabIndex="3"/>
                 </Grid>
             </Border>
 
@@ -339,7 +356,9 @@
                                        Foreground="#A6ADC8" 
                                        Margin="0,0,0,5"
                                        Visibility="{Binding TagsForSelectedNote.Count, Converter={StaticResource CountToVisibilityConverter}}"/>
-                            <ItemsControl ItemsSource="{Binding TagsForSelectedNote}">
+                            <ItemsControl ItemsSource="{Binding TagsForSelectedNote}"
+                                          AutomationProperties.Name="Теги текущей заметки"
+                                          AutomationProperties.HelpText="Список тегов, нажмите на тег для редактирования">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
                                         <WrapPanel/>
@@ -366,6 +385,8 @@
 
                         <!-- Заголовок -->
                         <TextBox x:Name="TitleBox"
+                                 AutomationProperties.Name="Заголовок заметки"
+                                 AutomationProperties.HelpText="Поле для редактирования заголовка"
                                  Text="{Binding SelectedNote.Title, UpdateSourceTrigger=PropertyChanged}"
                                  FontSize="24"
                                  FontWeight="Bold"
@@ -375,7 +396,8 @@
                                  Padding="0,0,0,5"
                                  Margin="0,10,0,0"
                                  CaretBrush="White"
-                                 IsEnabled="{Binding SelectedNote, Converter={StaticResource IsNotNullConverter}}">
+                                 IsEnabled="{Binding SelectedNote, Converter={StaticResource IsNotNullConverter}}"
+                                 TabIndex="10">
                             <TextBox.Template>
                                 <ControlTemplate TargetType="TextBox">
                                     <Grid>
@@ -401,6 +423,8 @@
 
                         <!-- Содержание -->
                         <TextBox x:Name="ContentBox"
+                                 AutomationProperties.Name="Содержание заметки"
+                                 AutomationProperties.HelpText="Поле для редактирования текста заметки"
                                  Text="{Binding SelectedNote.Content, UpdateSourceTrigger=PropertyChanged}"
                                  FontSize="16"
                                  Foreground="{StaticResource TextPrimary}"
@@ -410,7 +434,8 @@
                                  AcceptsReturn="True"
                                  MinHeight="400"
                                  CaretBrush="White"
-                                 IsEnabled="{Binding SelectedNote, Converter={StaticResource IsNotNullConverter}}">
+                                 IsEnabled="{Binding SelectedNote, Converter={StaticResource IsNotNullConverter}}"
+                                 TabIndex="11">
                             <TextBox.Template>
                                 <ControlTemplate TargetType="TextBox">
                                     <Grid>
@@ -441,8 +466,11 @@
                 Margin="0,0,38,28"
                 Style="{StaticResource RoundIconButton}"
                 Background="{StaticResource AIBtnBg}"
-                Click="AIBot_Click" Grid.Row="1">
+                Click="AIBot_Click" Grid.Row="1"
+                AutomationProperties.Name="ИИ ассистент"
+                AutomationProperties.HelpText="Открыть диалог с искусственным интеллектом (в разработке)">
             <Image Source="Assets/Images/ai-helper-icon.png" Width="50" Height="50"/>
         </Button>
     </Grid>
+
 </Window>
