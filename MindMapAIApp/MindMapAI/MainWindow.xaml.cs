@@ -167,6 +167,32 @@ namespace MindMapAI
         {
             int fontSize = Properties.Settings.Default.EditorFontSize;
             ContentBox.FontSize = fontSize;
+
+            // Если открыт предпросмотр, обновляем его
+            if (PreviewViewer.Visibility == Visibility.Visible)
+            {
+                var markdownText = ContentBox.Text;
+                var flowDocument = MarkdownToFlowDocumentConverter.Convert(markdownText);
+                PreviewViewer.Document = flowDocument;
+            }
+        }
+
+        private void PreviewToggle_Checked(object sender, RoutedEventArgs e)
+        {
+            // Переключаем видимость
+            ContentBox.Visibility = Visibility.Collapsed;
+            PreviewViewer.Visibility = Visibility.Visible;
+
+            // Конвертируем текущий Markdown в FlowDocument
+            var markdownText = ContentBox.Text;
+            var flowDocument = MarkdownToFlowDocumentConverter.Convert(markdownText);
+            PreviewViewer.Document = flowDocument;
+        }
+
+        private void PreviewToggle_Unchecked(object sender, RoutedEventArgs e)
+        {
+            ContentBox.Visibility = Visibility.Visible;
+            PreviewViewer.Visibility = Visibility.Collapsed;
         }
     }
 }

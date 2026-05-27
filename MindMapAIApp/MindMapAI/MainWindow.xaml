@@ -113,6 +113,39 @@
             </Setter>
         </Style>
 
+        <!-- Стиль для переключателя предпросмотра -->
+        <Style x:Key="PreviewToggleStyle" TargetType="ToggleButton">
+            <Setter Property="Background" Value="{StaticResource ItemBg}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource ItemHoverBg}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                              VerticalAlignment="Center"
+                                              Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsChecked" Value="True">
+                    <Setter Property="Background" Value="{StaticResource TextAccent}"/>
+                    <Setter Property="Foreground" Value="#1E1E2E"/>
+                </Trigger>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{StaticResource ItemHoverBg}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
         <!-- Стиль для скроллбара -->
         <Style x:Key="ModernScrollBar" TargetType="ScrollBar">
             <Setter Property="Width" Value="8"/>
@@ -421,10 +454,24 @@
                         <!-- Разделитель -->
                         <Border Height="1" Background="#313244" Margin="0,15,0,20"/>
 
-                        <!-- Содержание -->
+                        <!-- Переключатель режимов -->
+                        <ToggleButton x:Name="PreviewToggle"
+                                      Content="📖 Предпросмотр"
+                                      Style="{StaticResource PreviewToggleStyle}"
+                                      Width="120"
+                                      Height="32"
+                                      Margin="0,0,0,10"
+                                      HorizontalAlignment="Right"
+                                      Checked="PreviewToggle_Checked"
+                                      Unchecked="PreviewToggle_Unchecked"
+                                      AutomationProperties.Name="Режим предпросмотра"
+                                      AutomationProperties.HelpText="Переключение между редактированием и предпросмотром Markdown"/>
+
+                        <!-- Режим редактирования -->
                         <TextBox x:Name="ContentBox"
+                                 Visibility="Visible"
                                  AutomationProperties.Name="Содержание заметки"
-                                 AutomationProperties.HelpText="Поле для редактирования текста заметки"
+                                 AutomationProperties.HelpText="Поле для редактирования текста заметки. Поддерживает Markdown разметку"
                                  Text="{Binding SelectedNote.Content, UpdateSourceTrigger=PropertyChanged}"
                                  FontSize="16"
                                  Foreground="{StaticResource TextPrimary}"
@@ -440,7 +487,7 @@
                                 <ControlTemplate TargetType="TextBox">
                                     <Grid>
                                         <TextBlock x:Name="Placeholder"
-                                                   Text="Введите текст заметки..."
+                                                   Text="Введите текст заметки... (Поддерживает Markdown)"
                                                    Foreground="#666680"
                                                    FontSize="16"
                                                    Visibility="Collapsed"/>
@@ -454,6 +501,14 @@
                                 </ControlTemplate>
                             </TextBox.Template>
                         </TextBox>
+
+                        <!-- Режим предпросмотра -->
+                        <FlowDocumentScrollViewer x:Name="PreviewViewer"
+                                                  Visibility="Collapsed"
+                                                  MinHeight="400"
+                                                  Margin="0,0,0,0"
+                                                  AutomationProperties.Name="Предпросмотр заметки"
+                                                  AutomationProperties.HelpText="Отформатированный текст заметки в режиме чтения"/>
                     </StackPanel>
                 </ScrollViewer>
             </Border>
@@ -472,5 +527,4 @@
             <Image Source="Assets/Images/ai-helper-icon.png" Width="50" Height="50"/>
         </Button>
     </Grid>
-
 </Window>

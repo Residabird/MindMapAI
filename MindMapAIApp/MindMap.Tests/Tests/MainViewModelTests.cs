@@ -17,7 +17,7 @@ namespace MindMap.Tests.Tests
         {
             _mockDb = new Mock<IDatabaseService>();
 
-            _mockDb.Setup(db => db.GetAllNotes()).Returns(new List<Note>());
+            _mockDb.Setup(db => db.GetAllNotes()).Returns(new List<Note>()); 
             _mockDb.Setup(db => db.GetAllTags()).Returns(new List<Tag>());
 
             _viewModel = new MainViewModel(_mockDb.Object);
