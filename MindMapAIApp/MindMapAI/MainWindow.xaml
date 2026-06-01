@@ -335,6 +335,7 @@
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
@@ -362,8 +363,71 @@
                         </Button>
                     </StackPanel>
 
+                    <!-- Панель сортировки и фильтрации -->
+                    <Border Grid.Row="1" Background="{StaticResource LeftPanelBg}" Padding="8,5,8,5"
+                            AutomationProperties.Name="Панель сортировки и фильтрации"
+                            AutomationProperties.HelpText="Настройка сортировки и фильтрации списка заметок">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                <TextBlock Text="Сорт:" Foreground="#A6ADC8" FontSize="11" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                <ComboBox ItemsSource="{Binding SortFieldOptions}"
+                                          SelectedValuePath="Key"
+                                          DisplayMemberPath="Value"
+                                          SelectedValue="{Binding SelectedSortField}"
+                                          Background="#4A4A52"
+                                          Foreground="{StaticResource TextPrimary}"
+                                          BorderBrush="#313244"
+                                          FontSize="11"
+                                          Width="95"
+                                          Height="22"
+                                          AutomationProperties.Name="Поле сортировки"
+                                          AutomationProperties.HelpText="Выберите поле для сортировки заметок"/>
+                                <Button Command="{Binding ToggleSortDirectionCommand}"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        Cursor="Hand"
+                                        Width="22" Height="22"
+                                        Margin="3,0,0,0"
+                                        ToolTip="Изменить направление сортировки"
+                                        AutomationProperties.Name="Направление сортировки"
+                                        AutomationProperties.HelpText="Переключить сортировку по возрастанию или убыванию">
+                                    <TextBlock Text="{Binding SortArrow}" 
+                                               Foreground="{StaticResource TextAccent}"
+                                               FontSize="14"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"/>
+                                </Button>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Тег:" Foreground="#A6ADC8" FontSize="11" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                <ComboBox ItemsSource="{Binding FilterTagOptions}"
+                                          SelectedItem="{Binding FilterByTag}"
+                                          DisplayMemberPath="Name"
+                                          Background="#4A4A52"
+                                          Foreground="{StaticResource TextPrimary}"
+                                          BorderBrush="#313244"
+                                          FontSize="11"
+                                          Width="115"
+                                          Height="22"
+                                          AutomationProperties.Name="Фильтр по тегу"
+                                          AutomationProperties.HelpText="Показать заметки только с выбранным тегом"/>
+                                <Button Command="{Binding ClearTagFilterCommand}"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        Cursor="Hand"
+                                        Width="18" Height="18"
+                                        Margin="3,0,0,0"
+                                        ToolTip="Сбросить фильтр по тегу"
+                                        AutomationProperties.Name="Сбросить фильтр"
+                                        AutomationProperties.HelpText="Показать заметки со всеми тегами">
+                                    <TextBlock Text="✕" Foreground="{StaticResource TextSecondary}" FontSize="10"/>
+                                </Button>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
                     <ListBox x:Name="NotesListBox"
-                             Grid.Row="1"
+                             Grid.Row="2"
                              AutomationProperties.Name="Список заметок"
                              AutomationProperties.HelpText="Используйте стрелки для выбора заметки"
                              ItemsSource="{Binding FilteredNotes}"
@@ -404,12 +468,15 @@
                                                     Style="{StaticResource TagButtonStyle}"
                                                     Click="TagButton_Click"
                                                     Tag="{Binding}"/>
-                                            <TextBlock Text=" / " 
-                                                       FontSize="11" 
-                                                       Foreground="#55555E"
-                                                       FontStyle="Italic"
-                                                       VerticalAlignment="Center"
-                                                       Visibility="{Binding RelativeSource={RelativeSource PreviousData}, Converter={StaticResource LastTagVisibilityConverter}}"/>
+                                <TextBlock Text=" / " FontSize="11" Foreground="#55555E" FontStyle="Italic" VerticalAlignment="Center">
+                                    <TextBlock.Visibility>
+                                        <MultiBinding Converter="{StaticResource LastTagVisibilityConverter}">
+                                            <Binding />
+                                            <Binding RelativeSource="{RelativeSource AncestorType=ItemsControl}" Path="Items.Count" />
+                                            <Binding RelativeSource="{RelativeSource AncestorType=ItemsControl}" Path="ItemsSource" />
+                                        </MultiBinding>
+                                    </TextBlock.Visibility>
+                                </TextBlock>
                                         </StackPanel>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>

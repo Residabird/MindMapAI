@@ -1,23 +1,30 @@
 ﻿using System;
+using System.Collections;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
 
 namespace MindMapAI.ViewModels
 {
-         public class LastTagVisibilityConverter : IValueConverter
+    public class LastTagVisibilityConverter : IMultiValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            // Если элемент последний в коллекции — скрываем разделитель "/"
-            if (value == null)
-                return Visibility.Collapsed;
+            if (values.Length < 3) return Visibility.Visible;
 
-            // Этот конвертер получает PreviousData, поэтому если оно null — значит элемент первый
-            return value == null ? Visibility.Collapsed : Visibility.Visible;
+            var item = values[0];
+            if (item == null) return Visibility.Collapsed;
+
+            if (values[2] is IList list)
+            {
+                int index = list.IndexOf(item);
+                return index == list.Count - 1 ? Visibility.Collapsed : Visibility.Visible;
+            }
+
+            return Visibility.Visible;
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
         }

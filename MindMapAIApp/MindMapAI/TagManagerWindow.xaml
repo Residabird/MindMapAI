@@ -2,9 +2,8 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Управление тегами" 
-        Width="307" Height="475"
-        WindowStartupLocation="Manual"
-        Top="131" Left="504"
+        Width="340" Height="475"
+        WindowStartupLocation="CenterOwner"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
@@ -60,6 +59,7 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0" 
                                            Text="{Binding Name}" 
@@ -69,30 +69,53 @@
                                 <Button x:Name="EditTagBtn"
                                         Grid.Column="1"
                                         Width="20" Height="20"
-                                        Margin="0,0,8,0"
+                                        Margin="0,0,4,0"
                                         Background="Transparent"
                                         BorderThickness="0"
                                         Cursor="Hand"
                                         Visibility="Collapsed"
-                                        Click="EditTag_Click">
+                                        Click="EditTag_Click"
+                                        AutomationProperties.Name="Редактировать тег"
+                                        AutomationProperties.HelpText="Изменить название тега">
                                     <Image Source="/Assets/Images/pencil-icon.png" Width="16" Height="16"/>
                                 </Button>
-                                <Button x:Name="DeleteTagBtn"
+                                <Button x:Name="UnlinkTagBtn"
                                         Grid.Column="2"
                                         Width="20" Height="20"
+                                        Margin="0,0,4,0"
                                         Background="Transparent"
-                                        BorderThickness="0"         
-                                        Cursor="Hand"   
+                                        BorderThickness="0"
+                                        Cursor="Hand"
                                         Visibility="Collapsed"
-                                        Click="DeleteTag_Click">
+                                        Click="UnlinkTag_Click"
+                                        AutomationProperties.Name="Отвязать тег"
+                                        AutomationProperties.HelpText="Отвязать тег от текущей заметки">
                                     <Image Source="/Assets/Images/trash.png" Width="16" Height="16"/>
+                                </Button>
+                                <Button x:Name="DeleteTagGlobalBtn"
+                                        Grid.Column="3"
+                                        Width="20" Height="20"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        Cursor="Hand"
+                                        Visibility="Collapsed"
+                                        Click="DeleteTagGlobal_Click"
+                                        AutomationProperties.Name="Удалить тег из системы"
+                                        AutomationProperties.HelpText="Полностью удалить тег из всех заметок">
+                                    <TextBlock Text="✕" 
+                                               Foreground="{StaticResource DangerColor}"
+                                               FontSize="14"
+                                               FontWeight="Bold"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"/>
                                 </Button>
                             </Grid>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="EditTagBtn" Property="Visibility" Value="Visible"/>
-                                <Setter TargetName="DeleteTagBtn" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="UnlinkTagBtn" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="DeleteTagGlobalBtn" Property="Visibility" Value="Visible"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -141,7 +164,9 @@
         Background="Transparent"
         BorderThickness="0"
         Cursor="Hand"
-        Click="CloseButton_Click">
+        Click="CloseButton_Click"
+        AutomationProperties.Name="Закрыть"
+        AutomationProperties.HelpText="Закрыть окно управления тегами">
                 <Image Source="/Assets/Images/close-icon.png" 
            Width="30" 
            Height="30"/>
@@ -188,14 +213,18 @@
                         HorizontalAlignment="Center"
                         Width="120"
                         Click="NewTagButton_Click"
-                        Visibility="Visible"/>
+                        Visibility="Visible"
+                        AutomationProperties.Name="Добавить новый тег"
+                        AutomationProperties.HelpText="Создать новый тег и привязать к текущей заметке"/>
 
                         <TextBox x:Name="NewTagBox"
                          Style="{StaticResource ModernTextBox}"
                          Tag="Введите тег и нажмите Enter..."
                          Margin="0,8,0,0"
                          KeyDown="NewTagBox_KeyDown"
-                         Visibility="Collapsed"/>
+                         Visibility="Collapsed"
+                         AutomationProperties.Name="Ввод имени нового тега"
+                         AutomationProperties.HelpText="Введите название тега и нажмите Enter для подтверждения"/>
                     </StackPanel>
                 </Grid>
             </Border>

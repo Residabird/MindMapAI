@@ -121,18 +121,37 @@ namespace MindMapAI
             }
         }
 
-        private void DeleteTag_Click(object sender, RoutedEventArgs e)
+        private void UnlinkTag_Click(object sender, RoutedEventArgs e)
         {
             var button = sender as Button;
             var tag = button?.DataContext as Tag;
             if (tag == null) return;
 
-            var result = MessageBox.Show($"Удалить тег '{tag.Name}' из заметки?", "Подтверждение",
+            var result = MessageBox.Show($"Отвязать тег '{tag.Name}' от текущей заметки?", "Подтверждение",
                 MessageBoxButton.YesNo, MessageBoxImage.Question);
 
             if (result == MessageBoxResult.Yes)
             {
                 _databaseService.RemoveTagFromNote(_noteId, tag.Id);
+                Tags.Remove(tag);
+            }
+        }
+
+        private void DeleteTagGlobal_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as Button;
+            var tag = button?.DataContext as Tag;
+            if (tag == null) return;
+
+            var result = MessageBox.Show(
+                $"Удалить тег '{tag.Name}' из системы?\n\n" +
+                $"Тег будет удалён из всех заметок. Это действие нельзя отменить.",
+                "Глобальное удаление тега",
+                MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                _databaseService.DeleteTag(tag.Id);
                 Tags.Remove(tag);
             }
         }
