@@ -21,5 +21,10 @@ namespace MindMapAICore.Services
         List<Tag> GetTagsForNote(int noteId);
         void UpdateTag(Tag tag);
         List<Note> GetNotesByTag(int tagId);
+        List<Tag> GetUsedTags();
+        Dictionary<int, List<Tag>> GetAllNoteTags();
+        int GetTotalNoteCount();
+        NotePeriodStats GetNotesPeriodStats();
+        List<TagStat> GetTopTags(int count);
     }
 }

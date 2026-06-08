@@ -1,6 +1,7 @@
 ﻿<Window x:Class="MindMapAI.TagManagerWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:MindMapAI.ViewModels"
         Title="Управление тегами" 
         Width="307" Height="475"
         WindowStartupLocation="Manual"
@@ -74,7 +75,9 @@
                                         BorderThickness="0"
                                         Cursor="Hand"
                                         Visibility="Collapsed"
-                                        Click="EditTag_Click">
+                                        Click="EditTag_Click"
+                                        AutomationProperties.Name="Редактировать тег"
+                                        AutomationProperties.HelpText="Изменить название тега">
                                     <Image Source="/Assets/Images/pencil-icon.png" Width="16" Height="16"/>
                                 </Button>
                                 <Button x:Name="DeleteTagBtn"
@@ -84,7 +87,9 @@
                                         BorderThickness="0"         
                                         Cursor="Hand"   
                                         Visibility="Collapsed"
-                                        Click="DeleteTag_Click">
+                                        Click="DeleteTag_Click"
+                                        AutomationProperties.Name="Удалить тег"
+                                        AutomationProperties.HelpText="Удалить тег из системы">
                                     <Image Source="/Assets/Images/trash.png" Width="16" Height="16"/>
                                 </Button>
                             </Grid>
@@ -141,7 +146,9 @@
         Background="Transparent"
         BorderThickness="0"
         Cursor="Hand"
-        Click="CloseButton_Click">
+        Click="CloseButton_Click"
+        AutomationProperties.Name="Закрыть"
+        AutomationProperties.HelpText="Закрыть окно управления тегами">
                 <Image Source="/Assets/Images/close-icon.png" 
            Width="30" 
            Height="30"/>
@@ -177,7 +184,9 @@
                          ItemsSource="{Binding Tags}"
                          ItemContainerStyle="{StaticResource TagItemStyle}"
                          Background="Transparent"
-                         BorderThickness="0"/>
+                         BorderThickness="0"
+                         AutomationProperties.Name="Список тегов"
+                         AutomationProperties.HelpText="Список тегов, привязанных к заметке"/>
                     </Border>
 
                     <!-- Панель для нового тега -->
@@ -188,14 +197,18 @@
                         HorizontalAlignment="Center"
                         Width="120"
                         Click="NewTagButton_Click"
-                        Visibility="Visible"/>
+                        Visibility="Visible"
+                        AutomationProperties.Name="Добавить тег"
+                        AutomationProperties.HelpText="Создать и привязать новый тег к заметке"/>
 
                         <TextBox x:Name="NewTagBox"
                          Style="{StaticResource ModernTextBox}"
                          Tag="Введите тег и нажмите Enter..."
                          Margin="0,8,0,0"
                          KeyDown="NewTagBox_KeyDown"
-                         Visibility="Collapsed"/>
+                         Visibility="Collapsed"
+                         AutomationProperties.Name="Новый тег"
+                         AutomationProperties.HelpText="Введите название тега и нажмите Enter"/>
                     </StackPanel>
                 </Grid>
             </Border>

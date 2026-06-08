@@ -319,6 +319,33 @@ namespace MindMapAICore.Services
             return notes;
         }
 
+        public List<Tag> GetUsedTags()
+        {
+            var tags = new List<Tag>();
+
+            using var connection = new SqliteConnection(_connectionString);
+            connection.Open();
+
+            string sql = @"
+                SELECT DISTINCT t.Id, t.Name FROM Tags t
+                JOIN NoteTags nt ON t.Id = nt.TagId
+                ORDER BY t.Name";
+
+            using var command = new SqliteCommand(sql, connection);
+            using var reader = command.ExecuteReader();
+
+            while (reader.Read())
+            {
+                var tag = new Tag
+                {
+                    Id = reader.GetInt32(0),
+                    Name = reader.GetString(1)
+                };
+                tags.Add(tag);
+            }
+            return tags;
+        }
+
         public void UpdateTag(Tag tag)
         {
             using var connection = new SqliteConnection(_connectionString);
@@ -331,6 +358,110 @@ namespace MindMapAICore.Services
             command.Parameters.AddWithValue("@id", tag.Id);
 
             command.ExecuteNonQuery();
+        }
+
+        public Dictionary<int, List<Tag>> GetAllNoteTags()
+        {
+            var result = new Dictionary<int, List<Tag>>();
+
+            using var connection = new SqliteConnection(_connectionString);
+            connection.Open();
+
+            string sql = @"
+                SELECT nt.NoteId, t.Id, t.Name FROM NoteTags nt
+                JOIN Tags t ON t.Id = nt.TagId
+                ORDER BY nt.NoteId";
+
+            using var command = new SqliteCommand(sql, connection);
+            using var reader = command.ExecuteReader();
+
+            while (reader.Read())
+            {
+                var noteId = reader.GetInt32(0);
+                var tag = new Tag
+                {
+                    Id = reader.GetInt32(1),
+                    Name = reader.GetString(2)
+                };
+
+                if (!result.ContainsKey(noteId))
+                    result[noteId] = new List<Tag>();
+
+                result[noteId].Add(tag);
+            }
+
+            return result;
+        }
+
+        public int GetTotalNoteCount()
+        {
+            using var connection = new SqliteConnection(_connectionString);
+            connection.Open();
+
+            string sql = "SELECT COUNT(*) FROM Notes";
+            using var command = new SqliteCommand(sql, connection);
+            return Convert.ToInt32(command.ExecuteScalar());
+        }
+
+        public NotePeriodStats GetNotesPeriodStats()
+        {
+            using var connection = new SqliteConnection(_connectionString);
+            connection.Open();
+
+            string sql = @"
+                SELECT
+                    SUM(CASE WHEN date(CreatedAt) = date('now') THEN 1 ELSE 0 END) as Today,
+                    SUM(CASE WHEN CreatedAt >= datetime('now', '-7 days') THEN 1 ELSE 0 END) as ThisWeek,
+                    SUM(CASE WHEN CreatedAt >= datetime('now', '-30 days') THEN 1 ELSE 0 END) as ThisMonth,
+                    COUNT(*) as Total
+                FROM Notes";
+
+            using var command = new SqliteCommand(sql, connection);
+            using var reader = command.ExecuteReader();
+
+            if (reader.Read())
+            {
+                return new NotePeriodStats
+                {
+                    Today = reader.IsDBNull(0) ? 0 : reader.GetInt32(0),
+                    ThisWeek = reader.IsDBNull(1) ? 0 : reader.GetInt32(1),
+                    ThisMonth = reader.IsDBNull(2) ? 0 : reader.GetInt32(2),
+                    Total = reader.IsDBNull(3) ? 0 : reader.GetInt32(3)
+                };
+            }
+
+            return new NotePeriodStats();
+        }
+
+        public List<TagStat> GetTopTags(int count)
+        {
+            var tags = new List<TagStat>();
+
+            using var connection = new SqliteConnection(_connectionString);
+            connection.Open();
+
+            string sql = @"
+                SELECT t.Name, COUNT(*) as NoteCount
+                FROM Tags t
+                JOIN NoteTags nt ON t.Id = nt.TagId
+                GROUP BY t.Id, t.Name
+                ORDER BY NoteCount DESC
+                LIMIT @count";
+
+            using var command = new SqliteCommand(sql, connection);
+            command.Parameters.AddWithValue("@count", count);
+            using var reader = command.ExecuteReader();
+
+            while (reader.Read())
+            {
+                tags.Add(new TagStat
+                {
+                    TagName = reader.GetString(0),
+                    NoteCount = reader.GetInt32(1)
+                });
+            }
+
+            return tags;
         }
 
     }

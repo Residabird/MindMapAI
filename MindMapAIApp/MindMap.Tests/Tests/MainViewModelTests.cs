@@ -1,17 +1,25 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Windows;
 using MindMapAICore.Models;
 using MindMapAICore.Services;
 using MindMapAI.ViewModels;
 using Moq;
 using Xunit;
 
+public class TestableMainViewModel : MainViewModel
+    {
+        public TestableMainViewModel(IDatabaseService databaseService) : base(databaseService) { }
+
+        protected override MessageBoxResult ConfirmDelete() => MessageBoxResult.Yes;
+    }
+
 namespace MindMap.Tests.Tests
 {
     public class MainViewModelTests
     {
         private readonly Mock<IDatabaseService> _mockDb;
-        private readonly MainViewModel _viewModel;
+        private readonly TestableMainViewModel _viewModel;
 
         public MainViewModelTests()
         {
@@ -19,8 +27,11 @@ namespace MindMap.Tests.Tests
 
             _mockDb.Setup(db => db.GetAllNotes()).Returns(new List<Note>());
             _mockDb.Setup(db => db.GetAllTags()).Returns(new List<Tag>());
+            _mockDb.Setup(db => db.GetUsedTags()).Returns(new List<Tag>());
+            _mockDb.Setup(db => db.GetAllNoteTags()).Returns(new Dictionary<int, List<Tag>>());
+            _mockDb.Setup(db => db.AddNote(It.IsAny<Note>())).Callback<Note>(n => n.Id = 1);
 
-            _viewModel = new MainViewModel(_mockDb.Object);
+            _viewModel = new TestableMainViewModel(_mockDb.Object);
         }
 
         [Fact]

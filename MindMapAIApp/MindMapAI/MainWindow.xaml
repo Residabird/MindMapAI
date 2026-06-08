@@ -195,7 +195,9 @@
                                         Width="24" Height="24"
                                         Margin="0,0,8,0"
                                         Visibility="Collapsed"
-                                        Click="MoreButton_Click">
+                                        Click="MoreButton_Click"
+                                        AutomationProperties.Name="Больше действий"
+                                        AutomationProperties.HelpText="Открыть контекстное меню заметки">
                                     <Image Source="/Assets/Images/more-button-icon.png" Width="16" Height="16"/>
                                 </Button>
                             </Grid>
@@ -222,6 +224,121 @@
                        VerticalAlignment="Center"
                        TextTrimming="CharacterEllipsis"/>
         </DataTemplate>
+
+        <!-- Стиль для подписи секции (Сортировка / Фильтр) -->
+        <Style x:Key="SectionLabelStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Foreground" Value="#A6ADC8"/>
+            <Setter Property="Margin" Value="0,0,0,4"/>
+        </Style>
+
+        <!-- Стиль для выпадающих списков (сортировка и фильтр) -->
+        <Style x:Key="CompactComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="Background" Value="#2A2A3E"/>
+            <Setter Property="Foreground" Value="#CDD6F4"/>
+            <Setter Property="BorderBrush" Value="#313244"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="MinHeight" Value="28"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <Border x:Name="border"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="6"
+                                    Padding="0">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <ContentPresenter Grid.Column="0"
+                                                      ContentSource="SelectionBoxItem"
+                                                      Margin="{TemplateBinding Padding}"
+                                                      VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="1"
+                                               Text="▼"
+                                               FontSize="8"
+                                               Foreground="#A6ADC8"
+                                               Margin="0,0,8,0"
+                                               VerticalAlignment="Center"/>
+                                </Grid>
+                            </Border>
+                            <ToggleButton
+                                IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                ClickMode="Press">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="ToggleButton">
+                                        <Border Background="Transparent"/>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
+                            <Popup x:Name="PART_Popup"
+                                   IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   Placement="Bottom"
+                                   AllowsTransparency="True"
+                                   Focusable="False">
+                                <Border Background="#2A2A3E"
+                                        BorderBrush="#313244"
+                                        BorderThickness="1"
+                                        CornerRadius="6"
+                                        MaxHeight="200">
+                                    <ScrollViewer>
+                                        <ItemsPresenter/>
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#35354A"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Стиль для кнопки направления сортировки -->
+        <Style x:Key="SortDirToggleStyle" TargetType="ToggleButton">
+            <Setter Property="Background" Value="#2A2A3E"/>
+            <Setter Property="Foreground" Value="#A6ADC8"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#313244"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Width" Value="28"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#45475A"/>
+                                <Setter Property="Foreground" Value="#89B4FA"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#35354A"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
 
     <Grid>
@@ -286,7 +403,13 @@
                     </Border>
                 </StackPanel>
 
-                <StackPanel Grid.Column="2" Width="200"/>
+                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,11,0">
+                    <Button Style="{StaticResource IconButton}" Click="Statistics_Click"
+                            AutomationProperties.Name="Статистика"
+                            AutomationProperties.HelpText="Показать статистику заметок и тегов">
+                        <Image Source="/Assets/Images/analitics-icon.png" Width="22" Height="22"/>
+                    </Button>
+                </StackPanel>
             </Grid>
         </Border>
 
@@ -301,6 +424,8 @@
             <Border Grid.Column="0" Background="{StaticResource LeftPanelBg}">
                 <Grid>
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
@@ -329,8 +454,45 @@
                         </Button>
                     </StackPanel>
 
+                    <!-- Сортировка -->
+                    <Border Grid.Row="1" Padding="12,8,12,4">
+                        <StackPanel>
+                            <TextBlock Text="Сортировка" Style="{StaticResource SectionLabelStyle}"/>
+                            <StackPanel Orientation="Horizontal">
+                                <ComboBox ItemsSource="{Binding SortOptions}"
+                                          SelectedValue="{Binding SelectedSortField}"
+                                          SelectedValuePath="Value"
+                                          DisplayMemberPath="DisplayName"
+                                          Style="{StaticResource CompactComboBoxStyle}"
+                                          Width="150"
+                                          Margin="0,0,6,0"
+                                          AutomationProperties.Name="Поле сортировки"
+                                          AutomationProperties.HelpText="Выберите поле для сортировки заметок"/>
+                                <ToggleButton Content="↑"
+                                              IsChecked="{Binding IsSortAscending}"
+                                              Style="{StaticResource SortDirToggleStyle}"
+                                              AutomationProperties.Name="Направление сортировки"
+                                              AutomationProperties.HelpText="Переключить между возрастанием и убыванием"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Фильтр по тегу -->
+                    <Border Grid.Row="2" Padding="12,4,12,8">
+                        <StackPanel>
+                            <TextBlock Text="Фильтр по тегу" Style="{StaticResource SectionLabelStyle}"/>
+                            <ComboBox ItemsSource="{Binding TagFilterItems}"
+                                      SelectedValue="{Binding FilterByTagId}"
+                                      SelectedValuePath="TagId"
+                                      DisplayMemberPath="Name"
+                                      Style="{StaticResource CompactComboBoxStyle}"
+                                      AutomationProperties.Name="Фильтр по тегу"
+                                      AutomationProperties.HelpText="Показать только заметки с выбранным тегом"/>
+                        </StackPanel>
+                    </Border>
+
                     <ListBox x:Name="NotesListBox"
-                             Grid.Row="1"
+                             Grid.Row="3"
                              AutomationProperties.Name="Список заметок"
                              AutomationProperties.HelpText="Используйте стрелки для выбора заметки"
                              ItemsSource="{Binding FilteredNotes}"
@@ -370,7 +532,9 @@
                                             <Button Content="{Binding Name}" 
                                                     Style="{StaticResource TagButtonStyle}"
                                                     Click="TagButton_Click"
-                                                    Tag="{Binding}"/>
+                                                    Tag="{Binding}"
+                                                    AutomationProperties.Name="{Binding Name}"
+                                                    AutomationProperties.HelpText="Нажмите для управления тегами"/>
                                             <TextBlock Text=" / " 
                                                        FontSize="11" 
                                                        Foreground="#55555E"

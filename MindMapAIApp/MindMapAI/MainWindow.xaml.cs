@@ -3,6 +3,7 @@ using MindMapAICore.Models;
 using MindMapAICore.Services;
 using System.Collections.ObjectModel;
 using System.Windows;
+using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Media;
 
@@ -38,6 +39,14 @@ namespace MindMapAI
             {
                 ApplySettings();
             }
+        }
+
+        private void Statistics_Click(object sender, RoutedEventArgs e)
+        {
+            var statsWindow = new StatisticsWindow(_databaseService);
+            statsWindow.Owner = this;
+            statsWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+            statsWindow.ShowDialog();
         }
 
         private void Graph_Click(object sender, RoutedEventArgs e)
@@ -98,7 +107,11 @@ namespace MindMapAI
 
             var contextMenu = new ContextMenu();
             var deleteItem = new MenuItem { Header = "🗑 Удалить заметку" };
+            AutomationProperties.SetName(deleteItem, "Удалить заметку");
+            AutomationProperties.SetHelpText(deleteItem, "Удалить выбранную заметку");
             var addTagItem = new MenuItem { Header = "🏷 Теги" };
+            AutomationProperties.SetName(addTagItem, "Теги");
+            AutomationProperties.SetHelpText(addTagItem, "Открыть окно управления тегами для заметки");
 
             deleteItem.Click += (s, args) => _viewModel.DeleteNoteCommand.Execute(null);
             addTagItem.Click += (s, args) => OpenTagManagerForCurrentNote();
@@ -160,6 +173,7 @@ namespace MindMapAI
             tagWindow.Owner = this;
             tagWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             tagWindow.ShowDialog();
+            _viewModel.LoadData();
             _viewModel.LoadTagsForSelectedNote();
         }
 

@@ -13,6 +13,7 @@
     <None Remove="Assets\Images\add-new-file-icon.png" />
     <None Remove="Assets\Images\add-new-folder-icon.png" />
     <None Remove="Assets\Images\ai-helper-icon.png" />
+    <None Remove="Assets\Images\analitics-icon.png" />
     <None Remove="Assets\Images\close-icon.png" />
     <None Remove="Assets\Images\graph-icon.png" />
     <None Remove="Assets\Images\more-button-icon.png" />
@@ -49,6 +50,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Assets\Images\ai-helper-icon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\Images\analitics-icon.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Assets\Images\close-icon.png">

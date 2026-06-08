@@ -9,6 +9,23 @@ using System.Windows.Input;
 
 namespace MindMapAI.ViewModels
 {
+    public enum SortField { UpdatedAt, CreatedAt, Title }
+    public enum SortDirection { Descending, Ascending }
+
+    public class SortOption
+    {
+        public SortField Value { get; set; }
+        public string DisplayName { get; set; } = string.Empty;
+        public override string ToString() => DisplayName;
+    }
+
+    public class TagFilterItem
+    {
+        public int? TagId { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public override string ToString() => Name;
+    }
+
     public class MainViewModel : ViewModelBase
     {
         private readonly IDatabaseService _databaseService;
@@ -17,6 +34,7 @@ namespace MindMapAI.ViewModels
         private string _newNoteTitle = string.Empty;
         private int? _currentNoteId = null;
         private string _newNoteContent = string.Empty;
+        private Dictionary<int, List<Tag>> _noteTagsCache = new();
 
         public Note? SelectedNote
         {
@@ -71,21 +89,90 @@ namespace MindMapAI.ViewModels
             set => SetField(ref _tagsInput, value);
         }
 
+        private SortField _selectedSortField = SortField.UpdatedAt;
+        private bool _isSortAscending;
+        private int? _filterByTagId;
+
+        public SortField SelectedSortField
+        {
+            get => _selectedSortField;
+            set
+            {
+                SetField(ref _selectedSortField, value);
+                OnPropertyChanged(nameof(FilteredNotes));
+            }
+        }
+
+        public bool IsSortAscending
+        {
+            get => _isSortAscending;
+            set
+            {
+                SetField(ref _isSortAscending, value);
+                OnPropertyChanged(nameof(FilteredNotes));
+            }
+        }
+
+        public int? FilterByTagId
+        {
+            get => _filterByTagId;
+            set
+            {
+                SetField(ref _filterByTagId, value);
+                OnPropertyChanged(nameof(FilteredNotes));
+            }
+        }
+
+        public ObservableCollection<Tag> UsedTags { get; set; }
+        public ObservableCollection<TagFilterItem> TagFilterItems { get; set; }
+        public List<SortOption> SortOptions { get; } = new()
+        {
+            new SortOption { Value = SortField.UpdatedAt, DisplayName = "По дате изменения" },
+            new SortOption { Value = SortField.CreatedAt, DisplayName = "По дате создания" },
+            new SortOption { Value = SortField.Title, DisplayName = "По названию" },
+        };
+
         public List<Note> FilteredNotes
         {
             get
             {
-                if (string.IsNullOrWhiteSpace(FilterTag))
-                    return Notes.ToList();
+                var filtered = Notes.AsEnumerable();
 
-                var filter = FilterTag.ToLower();
+                var filter = FilterTag?.ToLower();
+                if (!string.IsNullOrWhiteSpace(filter))
+                {
+                    filtered = filtered.Where(n =>
+                        n.Title.ToLower().Contains(filter) ||
+                        GetCachedTags(n.Id).Any(t => t.Name.ToLower().Contains(filter))
+                    );
+                }
 
-                return Notes.Where(n =>
-                    n.Title.ToLower().Contains(filter) ||
-                    _databaseService.GetTagsForNote(n.Id).Any(t => t.Name.ToLower().Contains(filter))
-                ).ToList();
+                if (FilterByTagId.HasValue)
+                {
+                    var tagId = FilterByTagId.Value;
+                    filtered = filtered.Where(n =>
+                        GetCachedTags(n.Id).Any(t => t.Id == tagId)
+                    );
+                }
+
+                filtered = IsSortAscending
+                    ? filtered.OrderBy(n => GetSortValue(n))
+                    : filtered.OrderByDescending(n => GetSortValue(n));
+
+                return filtered.ToList();
             }
         }
+
+        private List<Tag> GetCachedTags(int noteId) =>
+            _noteTagsCache.TryGetValue(noteId, out var tags) ? tags : new List<Tag>();
+
+        private object GetSortValue(Note n) => SelectedSortField switch
+        {
+            SortField.Title => n.Title,
+            SortField.CreatedAt => n.CreatedAt,
+            SortField.UpdatedAt => n.UpdatedAt,
+            _ => n.UpdatedAt
+        };
 
         public MainViewModel(IDatabaseService databaseService)
         {
@@ -94,6 +181,8 @@ namespace MindMapAI.ViewModels
             Notes = new ObservableCollection<Note>();
             TagsForSelectedNote = new ObservableCollection<Tag>();
             AllTags = new ObservableCollection<Tag>();
+            UsedTags = new ObservableCollection<Tag>();
+            TagFilterItems = new ObservableCollection<TagFilterItem>();
 
             AddNoteCommand = new RelayCommand(AddNote);
             DeleteNoteCommand = new RelayCommand(DeleteNote, CanDeleteNote);
@@ -114,7 +203,7 @@ namespace MindMapAI.ViewModels
         public ICommand SaveNoteCommand { get; }
         public ICommand ApplyFilterCommand { get; }
 
-        private void LoadData()     // Загрузка данных 
+        public void LoadData()     // Загрузка данных 
         {
             var notesFromDb = _databaseService.GetAllNotes();
             Notes.Clear();
@@ -124,6 +213,8 @@ namespace MindMapAI.ViewModels
                 Notes.Add(note);
             }
 
+            _noteTagsCache = _databaseService.GetAllNoteTags();
+
             var tagsFromDb = _databaseService.GetAllTags();
 
             AllTags.Clear();
@@ -131,6 +222,18 @@ namespace MindMapAI.ViewModels
             foreach (var tag in tagsFromDb)
             {
                 AllTags.Add(tag);
+            }
+
+            var usedTags = _databaseService.GetUsedTags() ?? new List<Tag>();
+
+            UsedTags.Clear();
+            TagFilterItems.Clear();
+            TagFilterItems.Add(new TagFilterItem { TagId = null, Name = "Все заметки" });
+
+            foreach (var tag in usedTags)
+            {
+                UsedTags.Add(tag);
+                TagFilterItems.Add(new TagFilterItem { TagId = tag.Id, Name = tag.Name });
             }
         }
 
@@ -153,6 +256,14 @@ namespace MindMapAI.ViewModels
             SelectedNote = newNote;
         }
 
+        protected virtual MessageBoxResult ConfirmDelete() =>
+            MessageBox.Show(
+                $"Удалить заметку '{SelectedNote?.Title}'?",
+                "Подтверждение",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question
+            );
+
         private void DeleteNote()
         {
             if (SelectedNote == null)
@@ -161,7 +272,7 @@ namespace MindMapAI.ViewModels
                 return;
             }
 
-            var result = MessageBox.Show($"Удалить заметку '{SelectedNote.Title}'?", "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            var result = ConfirmDelete();
             if (result != MessageBoxResult.Yes)
                 return;
 
@@ -220,7 +331,7 @@ namespace MindMapAI.ViewModels
             if (SelectedNote == null)
                 return;
 
-            var tags = _databaseService.GetTagsForNote(SelectedNote.Id);
+            var tags = _databaseService.GetTagsForNote(SelectedNote.Id) ?? new List<Tag>();
 
             foreach (var tag in tags)
             {

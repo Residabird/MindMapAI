@@ -142,18 +142,24 @@
                                 Style="{StaticResource OptionButton}"
                                 Margin="0,0,10,0"
                                 Click="SmallFont_Click"
-                                Width="140"/>
+                                Width="140"
+                                AutomationProperties.Name="Маленький шрифт"
+                                AutomationProperties.HelpText="Установить размер шрифта редактора 14px"/>
                         <Button x:Name="MediumFontBtn"
                                 Content="Средний (16px)"
                                 Style="{StaticResource OptionButton}"
                                 Margin="0,0,10,0"
                                 Click="MediumFont_Click"
-                                Width="140"/>
+                                Width="140"
+                                AutomationProperties.Name="Средний шрифт"
+                                AutomationProperties.HelpText="Установить размер шрифта редактора 16px"/>
                         <Button x:Name="LargeFontBtn"
                                 Content="Большой (18px)"
                                 Style="{StaticResource OptionButton}"
                                 Click="LargeFont_Click"
-                                Width="140"/>
+                                Width="140"
+                                AutomationProperties.Name="Большой шрифт"
+                                AutomationProperties.HelpText="Установить размер шрифта редактора 18px"/>
                     </WrapPanel>
                 </StackPanel>
             </Border>
